@@ -1,0 +1,103 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{l+s+sd}{\PYGZdq{}\PYGZdq{}\PYGZdq{}}
+\PYG{l+s+sd}{    First step in pipeline, creates \PYGZsq{}raw\PYGZsq{} vtk files before normalizing}
+\PYG{l+s+sd}{\PYGZdq{}\PYGZdq{}\PYGZdq{}}
+\PYG{k+kn}{import} \PYG{n+nn}{vtk}
+\PYG{k+kn}{import} \PYG{n+nn}{glob}
+\PYG{k+kn}{import} \PYG{n+nn}{string}
+\PYG{k+kn}{import} \PYG{n+nn}{os}
+\PYG{k+kn}{import} \PYG{n+nn}{numpy} \PYG{k+kn}{as} \PYG{n+nn}{np}
+
+\PYG{n}{radius} \PYG{o}{=} \PYG{l+m+mf}{2.5}  \PYG{c}{\PYGZsh{} radius of averaging}
+\PYG{n}{b} \PYG{o}{=} \PYG{n}{os}\PYG{o}{.}\PYG{n}{getcwd}\PYG{p}{()}
+\PYG{n}{fskel} \PYG{o}{=} \PYG{n}{glob}\PYG{o}{.}\PYG{n}{glob}\PYG{p}{(}\PYG{n}{b}\PYG{o}{+}\PYG{l+s}{\PYGZsq{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s}{\PYGZsq{}}\PYG{o}{+}\PYG{l+s}{\PYGZsq{}*RFP*skel*\PYGZsq{}}\PYG{p}{)}
+\PYG{n}{fVR} \PYG{o}{=} \PYG{n}{glob}\PYG{o}{.}\PYG{n}{glob}\PYG{p}{(}\PYG{n}{b}\PYG{o}{+}\PYG{l+s}{\PYGZsq{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s}{\PYGZsq{}}\PYG{o}{+}\PYG{l+s}{\PYGZsq{}*RFP*resample*\PYGZsq{}}\PYG{p}{)}
+\PYG{n}{fVG} \PYG{o}{=} \PYG{n}{glob}\PYG{o}{.}\PYG{n}{glob}\PYG{p}{(}\PYG{n}{b}\PYG{o}{+}\PYG{l+s}{\PYGZsq{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s}{\PYGZsq{}}\PYG{o}{+}\PYG{l+s}{\PYGZsq{}*GFP*resample*\PYGZsq{}}\PYG{p}{)}  \PYG{c}{\PYGZsh{} GFP voxels}
+\PYG{n}{media} \PYG{o}{=} \PYG{n}{b}\PYG{o}{.}\PYG{n}{rsplit}\PYG{p}{(}\PYG{l+s}{\PYGZsq{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,} \PYG{l+m+mi}{1}\PYG{p}{)}
+\PYG{c}{\PYGZsh{} pylint: enable=C0103}
+\PYG{k}{for} \PYG{n}{x} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{fskel}\PYG{p}{)):}
+    \PYG{k}{print}\PYG{l+s}{\PYGZsq{}now on cell:}\PYG{l+s+si}{\PYGZpc{}3d}\PYG{l+s}{\PYGZsq{}} \PYG{o}{\PYGZpc{}} \PYG{n}{x}
+    \PYG{n}{reader} \PYG{o}{=} \PYG{n}{vtk}\PYG{o}{.}\PYG{n}{vtkPolyDataReader}\PYG{p}{()}
+    \PYG{n}{reader}\PYG{o}{.}\PYG{n}{SetFileName}\PYG{p}{(}\PYG{n}{fskel}\PYG{p}{[}\PYG{n}{x}\PYG{p}{])}
+    \PYG{n}{reader}\PYG{o}{.}\PYG{n}{Update}\PYG{p}{()}
+    \PYG{n}{reader2} \PYG{o}{=} \PYG{n}{vtk}\PYG{o}{.}\PYG{n}{vtkStructuredPointsReader}\PYG{p}{()}
+    \PYG{n}{reader2}\PYG{o}{.}\PYG{n}{SetFileName}\PYG{p}{(}\PYG{n}{fVG}\PYG{p}{[}\PYG{n}{x}\PYG{p}{])}
+    \PYG{n}{reader2}\PYG{o}{.}\PYG{n}{Update}\PYG{p}{()}
+    \PYG{n}{reader3} \PYG{o}{=} \PYG{n}{vtk}\PYG{o}{.}\PYG{n}{vtkStructuredPointsReader}\PYG{p}{()}
+    \PYG{n}{reader3}\PYG{o}{.}\PYG{n}{SetFileName}\PYG{p}{(}\PYG{n}{fVR}\PYG{p}{[}\PYG{n}{x}\PYG{p}{])}
+    \PYG{n}{reader3}\PYG{o}{.}\PYG{n}{Update}\PYG{p}{()}
+    \PYG{n}{dataSkel} \PYG{o}{=} \PYG{n}{reader}\PYG{o}{.}\PYG{n}{GetOutput}\PYG{p}{()}  \PYG{c}{\PYGZsh{} Skel coords value from skel file}
+    \PYG{n}{dataGFPV} \PYG{o}{=} \PYG{n}{reader2}\PYG{o}{.}\PYG{n}{GetOutput}\PYG{p}{()}  \PYG{c}{\PYGZsh{} voxels GFP}
+    \PYG{n}{dataRFPV} \PYG{o}{=} \PYG{n}{reader3}\PYG{o}{.}\PYG{n}{GetOutput}\PYG{p}{()}
+    \PYG{n}{maxR} \PYG{o}{=} \PYG{n}{dataRFPV}\PYG{o}{.}\PYG{n}{GetPointData}\PYG{p}{()}\PYG{o}{.}\PYG{n}{GetScalars}\PYG{p}{()}\PYG{o}{.}\PYG{n}{GetRange}\PYG{p}{()[}\PYG{l+m+mi}{1}\PYG{p}{]}
+    \PYG{n}{minR} \PYG{o}{=} \PYG{n}{dataRFPV}\PYG{o}{.}\PYG{n}{GetPointData}\PYG{p}{()}\PYG{o}{.}\PYG{n}{GetScalars}\PYG{p}{()}\PYG{o}{.}\PYG{n}{GetRange}\PYG{p}{()[}\PYG{l+m+mi}{0}\PYG{p}{]}
+    \PYG{n}{maxG} \PYG{o}{=} \PYG{n}{dataGFPV}\PYG{o}{.}\PYG{n}{GetPointData}\PYG{p}{()}\PYG{o}{.}\PYG{n}{GetScalars}\PYG{p}{()}\PYG{o}{.}\PYG{n}{GetRange}\PYG{p}{()[}\PYG{l+m+mi}{1}\PYG{p}{]}
+    \PYG{n}{minG} \PYG{o}{=} \PYG{n}{dataGFPV}\PYG{o}{.}\PYG{n}{GetPointData}\PYG{p}{()}\PYG{o}{.}\PYG{n}{GetScalars}\PYG{p}{()}\PYG{o}{.}\PYG{n}{GetRange}\PYG{p}{()[}\PYG{l+m+mi}{0}\PYG{p}{]}
+    \PYG{n}{ptsOld} \PYG{o}{=} \PYG{n}{dataSkel}\PYG{o}{.}\PYG{n}{GetPoints}\PYG{p}{()}
+    \PYG{n}{Cell} \PYG{o}{=} \PYG{n}{vtk}\PYG{o}{.}\PYG{n}{vtkCellArray}\PYG{p}{()}
+    \PYG{n}{dim} \PYG{o}{=} \PYG{n}{dataRFPV}\PYG{o}{.}\PYG{n}{GetDimensions}\PYG{p}{()}
+    \PYG{n}{intenGFP} \PYG{o}{=} \PYG{n}{dataGFPV}\PYG{o}{.}\PYG{n}{GetPointData}\PYG{p}{()}\PYG{o}{.}\PYG{n}{GetScalars}\PYG{p}{()}\PYG{o}{.}\PYG{n}{GetTuple1}
+    \PYG{n}{intenRFP} \PYG{o}{=} \PYG{n}{dataRFPV}\PYG{o}{.}\PYG{n}{GetPointData}\PYG{p}{()}\PYG{o}{.}\PYG{n}{GetScalars}\PYG{p}{()}\PYG{o}{.}\PYG{n}{GetTuple1}
+    \PYG{n}{skelWidth} \PYG{o}{=} \PYG{n}{dataSkel}\PYG{o}{.}\PYG{n}{GetPointData}\PYG{p}{()}\PYG{o}{.}\PYG{n}{GetScalars}\PYG{p}{(}\PYG{l+s}{\PYGZsq{}Width\PYGZsq{}}\PYG{p}{)}
+    \PYG{n}{loc} \PYG{o}{=} \PYG{n}{vtk}\PYG{o}{.}\PYG{n}{vtkPointLocator}\PYG{p}{()}
+    \PYG{n}{loc}\PYG{o}{.}\PYG{n}{SetDataSet}\PYG{p}{(}\PYG{n}{dataGFPV}\PYG{p}{)}
+    \PYG{n}{loc}\PYG{o}{.}\PYG{n}{BuildLocator}\PYG{p}{()}
+    \PYG{n}{result} \PYG{o}{=} \PYG{n}{vtk}\PYG{o}{.}\PYG{n}{vtkIdList}\PYG{p}{()}
+    \PYG{n}{rawRFP} \PYG{o}{=} \PYG{n}{vtk}\PYG{o}{.}\PYG{n}{vtkDoubleArray}\PYG{p}{()}
+    \PYG{n}{rawRFP}\PYG{o}{.}\PYG{n}{SetName}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}rRFP\PYGZdq{}}\PYG{p}{)}
+    \PYG{n}{rawGFP} \PYG{o}{=} \PYG{n}{vtk}\PYG{o}{.}\PYG{n}{vtkDoubleArray}\PYG{p}{()}
+    \PYG{n}{rawGFP}\PYG{o}{.}\PYG{n}{SetName}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}rGFP\PYGZdq{}}\PYG{p}{)}
+
+\PYG{c}{\PYGZsh{}   add the lines/ cells  for connectivity of skel info}
+
+    \PYG{k}{for} \PYG{n}{i} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{dataSkel}\PYG{o}{.}\PYG{n}{GetNumberOfLines}\PYG{p}{()):}
+        \PYG{n}{oldL} \PYG{o}{=} \PYG{n}{dataSkel}\PYG{o}{.}\PYG{n}{GetCell}\PYG{p}{(}\PYG{n}{i}\PYG{p}{)}\PYG{o}{.}\PYG{n}{GetPoints}\PYG{p}{()}
+        \PYG{n}{ptID} \PYG{o}{=} \PYG{n}{dataSkel}\PYG{o}{.}\PYG{n}{GetCell}\PYG{p}{(}\PYG{n}{i}\PYG{p}{)}\PYG{o}{.}\PYG{n}{GetPointIds}\PYG{p}{()}
+
+        \PYG{n}{oldPt} \PYG{o}{=} \PYG{p}{[}
+            \PYG{n}{oldL}\PYG{o}{.}\PYG{n}{GetPoint}\PYG{p}{(}\PYG{n}{idx}\PYG{p}{)} \PYG{k}{for} \PYG{n}{idx} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{oldL}\PYG{o}{.}\PYG{n}{GetNumberOfPoints}\PYG{p}{())]}
+
+        \PYG{n}{oldId} \PYG{o}{=} \PYG{p}{[}
+            \PYG{n}{ptID}\PYG{o}{.}\PYG{n}{GetId}\PYG{p}{(}\PYG{n}{pid}\PYG{p}{)} \PYG{k}{for} \PYG{n}{pid} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{ptID}\PYG{o}{.}\PYG{n}{GetNumberOfIds}\PYG{p}{())]}
+
+        \PYG{n}{Cell}\PYG{o}{.}\PYG{n}{InsertNextCell}\PYG{p}{(}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{oldId}\PYG{p}{))}
+
+        \PYG{k}{for} \PYG{n}{j} \PYG{o+ow}{in} \PYG{n}{oldId}\PYG{p}{:}
+            \PYG{n}{Cell}\PYG{o}{.}\PYG{n}{InsertCellPoint}\PYG{p}{(}\PYG{n}{j}\PYG{p}{)}
+
+\PYG{c}{\PYGZsh{}   averaging of pts intensity value surrounding each point in skel}
+    \PYG{k}{for} \PYG{n}{n} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{dataSkel}\PYG{o}{.}\PYG{n}{GetNumberOfPoints}\PYG{p}{()):}
+
+        \PYG{n}{ptOI} \PYG{o}{=} \PYG{n+nb}{tuple}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{ceil}\PYG{p}{(}\PYG{n}{i}\PYG{o}{/.}\PYG{l+m+mo}{055}\PYG{p}{)} \PYG{k}{for} \PYG{n}{i} \PYG{o+ow}{in} \PYG{n}{dataSkel}\PYG{o}{.}\PYG{n}{GetPoint}\PYG{p}{(}\PYG{n}{n}\PYG{p}{))}
+
+        \PYG{n}{loc}\PYG{o}{.}\PYG{n}{FindPointsWithinRadius}\PYG{p}{(}\PYG{n}{radius}\PYG{p}{,} \PYG{n}{ptOI}\PYG{p}{,} \PYG{n}{result}\PYG{p}{)}
+
+        \PYG{n}{voxID} \PYG{o}{=} \PYG{p}{[}
+            \PYG{n}{result}\PYG{o}{.}\PYG{n}{GetId}\PYG{p}{(}\PYG{n}{i}\PYG{p}{)} \PYG{k}{for} \PYG{n}{i} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{result}\PYG{o}{.}\PYG{n}{GetNumberOfIds}\PYG{p}{())]}
+
+        \PYG{n}{g} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{mean}\PYG{p}{([}\PYG{n}{intenGFP}\PYG{p}{(}\PYG{n}{m}\PYG{p}{)} \PYG{k}{for} \PYG{n}{m} \PYG{o+ow}{in} \PYG{n}{voxID}\PYG{p}{])}
+        \PYG{n}{rawGFP}\PYG{o}{.}\PYG{n}{InsertNextValue}\PYG{p}{(}\PYG{n}{g}\PYG{p}{)}
+
+        \PYG{n}{r} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{mean}\PYG{p}{([}\PYG{n}{intenRFP}\PYG{p}{(}\PYG{n}{m}\PYG{p}{)} \PYG{k}{for} \PYG{n}{m} \PYG{o+ow}{in} \PYG{n}{voxID}\PYG{p}{])}
+        \PYG{n}{rawRFP}\PYG{o}{.}\PYG{n}{InsertNextValue}\PYG{p}{(}\PYG{n}{r}\PYG{p}{)}
+
+    \PYG{n}{polyData} \PYG{o}{=} \PYG{n}{vtk}\PYG{o}{.}\PYG{n}{vtkPolyData}\PYG{p}{()}
+    \PYG{n}{polyData}\PYG{o}{.}\PYG{n}{SetPoints}\PYG{p}{(}\PYG{n}{ptsOld}\PYG{p}{)}
+    \PYG{n}{polyData}\PYG{o}{.}\PYG{n}{SetLines}\PYG{p}{(}\PYG{n}{Cell}\PYG{p}{)}
+    \PYG{n}{polyData}\PYG{o}{.}\PYG{n}{GetPointData}\PYG{p}{()}\PYG{o}{.}\PYG{n}{AddArray}\PYG{p}{(}\PYG{n}{rawRFP}\PYG{p}{)}
+    \PYG{n}{polyData}\PYG{o}{.}\PYG{n}{GetPointData}\PYG{p}{()}\PYG{o}{.}\PYG{n}{AddArray}\PYG{p}{(}\PYG{n}{rawGFP}\PYG{p}{)}
+    \PYG{n}{polyData}\PYG{o}{.}\PYG{n}{GetPointData}\PYG{p}{()}\PYG{o}{.}\PYG{n}{AddArray}\PYG{p}{(}\PYG{n}{skelWidth}\PYG{p}{)}
+
+    \PYG{n}{list1} \PYG{o}{=} \PYG{p}{[]}
+    \PYG{n}{writer} \PYG{o}{=} \PYG{n}{vtk}\PYG{o}{.}\PYG{n}{vtkPolyDataWriter}\PYG{p}{()}
+
+    \PYG{n}{fileName} \PYG{o}{=} \PYG{n}{fskel}\PYG{p}{[}\PYG{n}{x}\PYG{p}{]}\PYG{o}{.}\PYG{n}{rsplit}\PYG{p}{(}\PYG{l+s}{\PYGZsq{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,} \PYG{l+m+mi}{1}\PYG{p}{)[}\PYG{l+m+mi}{1}\PYG{p}{]}
+    \PYG{n}{fileString} \PYG{o}{=} \PYG{n}{os}\PYG{o}{.}\PYG{n}{path}\PYG{o}{.}\PYG{n}{join}\PYG{p}{(}
+        \PYG{n}{os}\PYG{o}{.}\PYG{n}{getcwd}\PYG{p}{(),} \PYG{n}{string}\PYG{o}{.}\PYG{n}{join}\PYG{p}{(}
+            \PYG{p}{(}\PYG{n+nb}{str}\PYG{p}{(}\PYG{n}{radius}\PYG{p}{),} \PYG{l+s}{\PYGZsq{}raw\PYGZsq{}}\PYG{p}{,} \PYG{n}{fileName}\PYG{p}{),} \PYG{n}{sep}\PYG{o}{=}\PYG{l+s}{\PYGZsq{}\PYGZus{}\PYGZsq{}}\PYG{p}{))}
+
+    \PYG{n}{writer} \PYG{o}{=} \PYG{n}{vtk}\PYG{o}{.}\PYG{n}{vtkPolyDataWriter}\PYG{p}{()}
+    \PYG{n}{writer}\PYG{o}{.}\PYG{n}{SetFileName}\PYG{p}{(}\PYG{n}{fileString}\PYG{p}{)}
+    \PYG{n}{writer}\PYG{o}{.}\PYG{n}{SetInput}\PYG{p}{(}\PYG{n}{polyData}\PYG{p}{)}
+    \PYG{n}{writer}\PYG{o}{.}\PYG{n}{Update}\PYG{p}{()}
+\end{Verbatim}

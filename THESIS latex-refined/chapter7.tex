@@ -1,0 +1,52 @@
+\chapter{Significance and future direction}\label{ch:seven}
+\section{Significance}
+We have developed a quantitative, multiscale data analysis framework that is able to provide an integrated overview of the relationship between mitochondrial network structure and its bioenergetic state. We showed that by applying our framework onto populations of cells with different respiration states, we were able to provide insight into the changes in their mitochondrial ultrastructure, network structure and functional asymmetry during cell division.
+
+Our first contribution to the field is providing the basic tools and formalizing an approach to perform structure-function relationship of yeast mitochondrial networks in an integrated, quantitative manner. The data that we obtained could offer another contribution by providing the parameters and constraining the solution space for a computational model of mitochondrial quality control through fission and fusion events. The present computational models of how mitochondrial dynamics regulate mitochondrial quality do not integrate detailed spatial and topological information of the network and how function is related to these spatial features \cite{mouli_frequency_2009,patel_optimal_2013}. This is provided for in our dataset at multiple size scales. The weakness in our dataset is a lack of sufficient temporal resolution such that we were unable to incorporate fission and fusion rates into our pipeline.
+ 
+Here we discuss several directions for future research that we believe can extend the utility of the tools developed and provide further insight into the biology of the mitochondrial network.
+\section{Improved spatial resolution}
+The spinning disk confocal microscope platform that we use provides the best balance between spatial and temporal resolution with minimal phototoxicity. It allows us to obtain a multiscale understanding of structure and function relationship in yeast mitochondrial networks. However if we are only interested in for example, the ultrastructure level we could use different imaging methods such as superresolution microscopy, deconvolution or electron microscopy.
+
+While MitoGraph v2.0 is currently very consistent (96.7\% reproducibility \cite{viana_chapter_2015}), its accuracy tends to suffer especially in regions where the mitochondrial network is very dense. These dense regions are precisely the regions of most interest to our network connectivity analysis, as they have much more entropy (information content) in their topology. Superresolution and deconvolution microscopy could potentially resolve these difficult regions for MitoGraph to work well. The main barriers to superresolution, apart from cost and access, is the tradeoff between spatial and temporal resolution. Superresolution techniques tend to be very slow as they must sample the image many times to obtain sub-pixel localization (STORM \cite{rust_sub-diffraction-limit_2006} and PALM \cite{betzig_imaging_2006}) or multiplex multiple frequency bands (structured illumination \cite{kner_super-resolution_2009}). However this problem might be overcome if imaging rates are improved substantially \cite{abrahamsson_fast_2013,babcock_fast_2013} along with the use of improved bright fluorescent proteins that have sufficiently high signal so that faster acquisition speeds can be used. Deconvolution of the images obtained from the spinning disk could potentially increase the resolution as well, however it would require a careful calibration of the point spread function of the system and subsequent validation of the deconvolved images before we can be confident in the data analysis.
+
+In fact superresolution would be useful not just in increasing the accuracy of the skeletonization by MitoGraph v2.0, but would also allow direct observations of the cristae structure that we probed indirectly in \Fref{ch:four}. Preliminary images have already shown that live cell imaging of cristae stained with a mitochondrial membrane dye (Mitotracker) is possible (\url{http://www.nikon.com/products/instruments/lineup/bioscience/s-resolution/nsim/}), however at present this system requires a sampling level that results in phototoxicity to the mitochondria.
+
+Another way to obtain improved spatial resolution is to used electron microscopy (EM) to directly image the ultrastructure. In \Fref{ch:four} we mentioned that line scan analysis of the data from several studies using EM have confirmed that tubule thickness increases when mitochondria are undergoing respiration. However, with the exception of very old studies from the 60's, these EM imaging studies were not directly focused on changes to mitochondrial cross sectional width and the distribution of tubule thickness under different respiratory conditions. Hence it could be an interesting research topic to use EM to study changes to the morphology and size of the mitochondrial ultrastructure in yeast when their respiratory state is perturbed using different carbon sources. However this kind of study suffers from low throughput and requires a steep learning curve, therefore a collaboration with a group that specializes in EM or even EM tomography would be ideal.
+\section{Genetically encoded functional sensors}
+The mapping of function onto mitochondrial networks can be greatly improved with a fluorescent protein marker for mitochondrial membrane potential (ΔΨ). The expression of a fluorescent protein marker for ΔΨ would in theory have much less variability (especially if it was integrated into the genome) compared to cell to cell uptake variability of a dye. This would allow an absolute value of ΔΨ to be used based on the Nernst equation, thus enabling one to make direct comparisons of ΔΨ between cells growing in the same carbon source. However at present the current generation of fluorescent proteins that are voltage sensitive suffer from two huge barriers \cite{akemann_imaging_2010,kralj_optical_2012,sunita_ghimire_gautam_exploration_2009}---they are very difficult to target and be expressed correctly on the inner mitochondrial membrane, and perhaps even more important their fluorescent signal is so low and requires so much laser excitation power that the mitochondrial network is degraded beyond the point of observation due to photodamage.
+
+However, it is worth mentioning that our pipeline can be adapted to any functional sensor that can be targeted specifically to mitochondrial function. For example we could use a genetically encoded redox sensor (roGFP), a hydrogen peroxide sensor (HyPer) or superoxide sensor (mt-cpYFP), an ATP sensor (Ateam) or ADP/ATP ratio sensor (Perceval) and so on (references and reviews in \cite{newman_genetically_2011}). The challenge of these sensors are again the same as in the membrane voltage sensor, namely signal to noise ratio and correct localization to the mitochondria. However with so many options it is likely that at least one of them can be successfully adapted to serve as a genetically encoded marker for mitochondrial functional state.
+\section{Refinement in experimental setup}
+In \Fref{ch:three} we mentioned that we only measured basal respiration rates due to the difficulty of using a Clark electrode to measure oxygen consumption rates in live yeast cells. The use of a Seahorse XF analyzer would enable us to determine the respiratory control ratios and spare respiratory capacity of mitochondria from cells in different carbon sources. This would then confirm or disprove our theory that mitochondria in lactate and raffinose are respiring less efficiently that in glycerol+ethanol.
+
+The results from \Fref{ch:five} indicate that there is no relationship between mitochondrial function (ΔΨ) and connectivity within specific regions of the mitochondrial network. However one of our assumptions was that highly connected regions were also the sites of higher mitochondrial fusion and fission activity. While our results indicate that this is not true at the global level, it might still be true within localized areas of the network. This would require dynamic data (i.e. time courses where we can observe sites of fission and fusion) to distinguish areas of the network with high fusion activity. Only with this data can we conclusively say whether there is a correlation between the rate of mitochondrial dynamics and function/ ΔΨ. The difficulty in obtaining dynamic data is that it is very difficult to segment automatically mitochondrial fission and fusion sites, although work is ongoing to enable this functionality in MitoGraph. We also observed no functional dependence of mitophagy with ΔΨ in isolated mitochondrial fragments, but without following isolated fragments of mitochondria in real time and determining which ones are targeted for autophagy, we cannot conclusively say that mitophagy has no functional selection criteria. Furthermore we would also need to label the vacuoles or some other part of the autophagic machinery in order to have a reliable marker for mitophagy events.
+ 
+In  \Fref{ch:six} we present some interesting findings regarding the distribution of ΔΨ along the mother daughter axis. Our preliminary results indicate that ΔΨ increases and then plateaus halfway along the mother cell axis. In addition buds maintain a higher level of ΔΨ throughout the entire cycle. Our data provides some constraints on any future mathematical models of how mitochondrial functional asymmetry is achieved. Our findings also suggests that the mitochondrial quality selection process involves the mitochondrial transport and tethering machinery. By applying our pipeline on deletion mutants for transport and tethering proteins, we could potentially gain some mechanistic insight into the relationship between the mitochondrial inheritance machinery and quality selection during cell division.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

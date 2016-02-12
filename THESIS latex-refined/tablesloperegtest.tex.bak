@@ -1,0 +1,41 @@
+\documentclass[10pt,letterpaper,oneside]{article}
+% A few common packages
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{relsize}
+% Some other useful packages
+\usepackage[font=footnotesize]{caption,subcaption}
+\captionsetup{labelformat=simple, labelfont=bf,singlelinecheck=false}
+%\usepackage{multirow}
+%\usepackage{tabularx}
+\usepackage{booktabs}
+
+\begin{document}
+\begin{center}
+\begin{tabular}{lclc}
+\toprule
+\textbf{Dep. Variable:}         &   mtnetwork avg deg    & \textbf{  R-squared:         } &     0.251   \\
+\textbf{Model:}                 &       OLS        & \textbf{  Adj. R-squared:    } &     0.246   \\
+\textbf{Method:}                &  Least Squares   & \textbf{  F-statistic:       } &     45.58   \\
+\textbf{Date:}                  & Sun, 15 Nov 2015 & \textbf{  Prob (F-statistic):} &  2.01e-25   \\
+\textbf{Time:}                  &     18:42:03     & \textbf{  Log-Likelihood:    } &   -4.9669   \\
+\textbf{No. Observations:}      &         412      & \textbf{  AIC:               } &     17.93   \\
+\textbf{Df Residuals:}          &         408      & \textbf{  BIC:               } &     34.02   \\
+\textbf{Df Model:}              &           3      & \textbf{                     } &             \\
+\bottomrule
+\end{tabular}
+\bigskip
+\begin{tabular}{lccccc}
+& \textbf{coef} & \textbf{std err} & \textbf{t} & \textbf{P$>$$|$t$|$} & \textbf{[95.0\% Conf. Int.]}  \\
+
+\textbf{Intercept}              &       1.4444  &        0.136     &    10.599  &         0.000        &         1.176-1.712       \\
+\textbf{fermt.[T.resp.]}        &       0.2500  &        0.148     &     1.684  &         0.093        &        -0.042-0.542       \\
+\textbf{Dens.}                 &       2.1012  &        0.476     &     4.412  &         0.000        &         1.165-3.038       \\
+\textbf{Dens.:fermt.[T.resp.]} &      -1.3278  &        0.484     &    -2.743  &         0.006        &        -2.279--0.376       \\
+\bottomrule
+\end{tabular}
+
+\end{center}
+\end{document}

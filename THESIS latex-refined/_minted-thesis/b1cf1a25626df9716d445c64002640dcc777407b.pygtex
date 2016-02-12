@@ -1,0 +1,133 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{l+s+sd}{\PYGZdq{}\PYGZdq{}\PYGZdq{}}
+\PYG{l+s+sd}{    This module returns edgeslist,nodelist and graph objects from VTK files}
+\PYG{l+s+sd}{\PYGZdq{}\PYGZdq{}\PYGZdq{}}
+\PYG{k+kn}{import} \PYG{n+nn}{vtk}
+\PYG{k+kn}{import} \PYG{n+nn}{glob}
+\PYG{k+kn}{import} \PYG{n+nn}{math}
+\PYG{k+kn}{import} \PYG{n+nn}{numpy} \PYG{k+kn}{as} \PYG{n+nn}{np}
+\PYG{k+kn}{import} \PYG{n+nn}{networkx} \PYG{k+kn}{as} \PYG{n+nn}{nx}
+\PYG{k+kn}{import} \PYG{n+nn}{cPickle} \PYG{k+kn}{as} \PYG{n+nn}{pickle}
+\PYG{k+kn}{import} \PYG{n+nn}{os}
+
+
+\PYG{k}{def} \PYG{n+nf}{disteuc}\PYG{p}{(}\PYG{n}{pt1}\PYG{p}{,} \PYG{n}{pt2}\PYG{p}{):}
+    \PYG{l+s+sd}{\PYGZdq{}\PYGZdq{}\PYGZdq{}returns euclidian dist btw pt1 and pt2}
+\PYG{l+s+sd}{    \PYGZdq{}\PYGZdq{}\PYGZdq{}}
+    \PYG{k}{return} \PYG{n}{math}\PYG{o}{.}\PYG{n}{sqrt}\PYG{p}{(}\PYG{n}{vtk}\PYG{o}{.}\PYG{n}{vtkMath}\PYG{o}{.}\PYG{n}{Distance2BetweenPoints}\PYG{p}{(}\PYG{n}{pt1}\PYG{p}{,} \PYG{n}{pt2}\PYG{p}{))}
+
+\PYG{c}{\PYGZsh{} pylint: disable=C0103}
+\PYG{n}{fileloc} \PYG{o}{=} \PYG{n}{os}\PYG{o}{.}\PYG{n}{getcwd}\PYG{p}{()}\PYG{o}{+}\PYG{l+s}{\PYGZsq{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s}{\PYGZsq{}}\PYG{o}{+}\PYG{l+s}{\PYGZsq{}Norm*vtk\PYGZsq{}}
+\PYG{n}{fileglb} \PYG{o}{=} \PYG{n}{glob}\PYG{o}{.}\PYG{n}{glob}\PYG{p}{(}\PYG{n}{fileloc}\PYG{p}{)}
+\PYG{n}{lab} \PYG{o}{=} \PYG{n}{fileglb}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{o}{.}\PYG{n}{rsplit}\PYG{p}{(}\PYG{l+s}{\PYGZsq{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,} \PYG{l+m+mi}{1}\PYG{p}{)[}\PYG{l+m+mi}{1}\PYG{p}{][}\PYG{l+m+mi}{5}\PYG{p}{:}\PYG{l+m+mi}{8}\PYG{p}{]}
+\PYG{k}{print} \PYG{l+s}{\PYGZsq{}creating edge node lists for }\PYG{l+s+si}{\PYGZpc{}s}\PYG{l+s}{\PYGZsq{}} \PYG{o}{\PYGZpc{}} \PYG{n}{lab}
+\PYG{k}{print}\PYG{l+s}{\PYGZsq{}number of files = }\PYG{l+s+si}{\PYGZpc{}3d}\PYG{l+s}{\PYGZsq{}} \PYG{o}{\PYGZpc{}} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{fileglb}\PYG{p}{)}
+
+\PYG{c}{\PYGZsh{}               INITIALIZE}
+\PYG{n}{nnodes} \PYG{o}{=} \PYG{l+m+mi}{0}
+\PYG{n}{G} \PYG{o}{=} \PYG{p}{[]}  \PYG{c}{\PYGZsh{} list container for graphs of each cell}
+\PYG{n}{EDL} \PYG{o}{=} \PYG{p}{[]}
+\PYG{n}{X} \PYG{o}{=} \PYG{p}{[]}
+\PYG{n}{Y} \PYG{o}{=} \PYG{p}{[]}
+\PYG{n}{files} \PYG{o}{=} \PYG{n}{fileglb}
+\PYG{n}{reader} \PYG{o}{=} \PYG{n}{vtk}\PYG{o}{.}\PYG{n}{vtkPolyDataReader}\PYG{p}{()}
+\PYG{c}{\PYGZsh{} pylint: enable=C0103}
+
+\PYG{k}{for} \PYG{n}{a} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{files}\PYG{p}{)):}
+    \PYG{c}{\PYGZsh{} for a in range(len(files)):}
+    \PYG{n}{reader}\PYG{o}{.}\PYG{n}{SetFileName}\PYG{p}{(}\PYG{n}{files}\PYG{p}{[}\PYG{n}{a}\PYG{p}{])}
+    \PYG{n}{reader}\PYG{o}{.}\PYG{n}{Update}\PYG{p}{()}
+    \PYG{n}{data} \PYG{o}{=} \PYG{n}{reader}\PYG{o}{.}\PYG{n}{GetOutput}\PYG{p}{()}
+    \PYG{n}{scalars} \PYG{o}{=} \PYG{n}{data}\PYG{o}{.}\PYG{n}{GetPointData}\PYG{p}{()}\PYG{o}{.}\PYG{n}{GetScalars}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}DY\PYGZus{}raw\PYGZdq{}}\PYG{p}{)}
+    \PYG{n}{num\PYGZus{}lines} \PYG{o}{=} \PYG{n}{data}\PYG{o}{.}\PYG{n}{GetNumberOfLines}\PYG{p}{()}
+    \PYG{n}{fname} \PYG{o}{=} \PYG{n}{files}\PYG{p}{[}\PYG{n}{a}\PYG{p}{]}\PYG{o}{.}\PYG{n}{rsplit}\PYG{p}{(}\PYG{l+s}{\PYGZsq{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,} \PYG{l+m+mi}{1}\PYG{p}{)[}\PYG{l+m+mi}{1}\PYG{p}{][}\PYG{l+m+mi}{5}\PYG{p}{:}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{13}\PYG{p}{]}
+    \PYG{n}{G}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{n}{nx}\PYG{o}{.}\PYG{n}{MultiGraph}\PYG{p}{(}\PYG{n}{cell}\PYG{o}{=}\PYG{n}{fname}\PYG{p}{))}
+
+\PYG{c}{\PYGZsh{}   for every line in each cell, starting from the highest index compare the}
+\PYG{c}{\PYGZsh{}   end points of that line with another line of the next lower index, if}
+\PYG{c}{\PYGZsh{}   pythagorean dist==0, label it a node and add it to the graph object G[a]}
+    \PYG{k}{for} \PYG{n}{i} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{num\PYGZus{}lines}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}\PYG{p}{):}
+        \PYG{n}{line1} \PYG{o}{=} \PYG{n}{data}\PYG{o}{.}\PYG{n}{GetCell}\PYG{p}{(}\PYG{n}{i}\PYG{p}{)}\PYG{o}{.}\PYG{n}{GetPoints}\PYG{p}{()}
+        \PYG{n}{np\PYGZus{}pointsi} \PYG{o}{=} \PYG{n}{line1}\PYG{o}{.}\PYG{n}{GetNumberOfPoints}\PYG{p}{()}
+        \PYG{n}{pointID} \PYG{o}{=} \PYG{n}{data}\PYG{o}{.}\PYG{n}{GetCell}\PYG{p}{(}\PYG{n}{i}\PYG{p}{)}\PYG{o}{.}\PYG{n}{GetPointIds}\PYG{p}{()}
+        \PYG{n}{exist1} \PYG{o}{=} \PYG{n}{exist2} \PYG{o}{=} \PYG{n+nb+bp}{False}
+        \PYG{n}{r1} \PYG{o}{=} \PYG{n}{line1}\PYG{o}{.}\PYG{n}{GetPoint}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{)}
+        \PYG{n}{r2} \PYG{o}{=} \PYG{n}{line1}\PYG{o}{.}\PYG{n}{GetPoint}\PYG{p}{(}\PYG{n}{np\PYGZus{}pointsi}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}\PYG{p}{)}
+        \PYG{n}{inten1} \PYG{o}{=} \PYG{n}{scalars}\PYG{o}{.}\PYG{n}{GetTuple1}\PYG{p}{(}\PYG{n}{pointID}\PYG{o}{.}\PYG{n}{GetId}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{))}
+        \PYG{n}{inten2} \PYG{o}{=} \PYG{n}{scalars}\PYG{o}{.}\PYG{n}{GetTuple1}\PYG{p}{(}\PYG{n}{pointID}\PYG{o}{.}\PYG{n}{GetId}\PYG{p}{(}\PYG{n}{np\PYGZus{}pointsi}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}\PYG{p}{))}
+
+        \PYG{k}{for} \PYG{n}{j} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{i}\PYG{o}{+}\PYG{l+m+mi}{1}\PYG{p}{):}
+            \PYG{n}{line2} \PYG{o}{=} \PYG{n}{data}\PYG{o}{.}\PYG{n}{GetCell}\PYG{p}{(}\PYG{n}{j}\PYG{p}{)}\PYG{o}{.}\PYG{n}{GetPoints}\PYG{p}{()}
+            \PYG{n}{np\PYGZus{}pointsj} \PYG{o}{=} \PYG{n}{line2}\PYG{o}{.}\PYG{n}{GetNumberOfPoints}\PYG{p}{()}
+            \PYG{n}{s1} \PYG{o}{=} \PYG{n}{line2}\PYG{o}{.}\PYG{n}{GetPoint}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{)}
+            \PYG{n}{s2} \PYG{o}{=} \PYG{n}{line2}\PYG{o}{.}\PYG{n}{GetPoint}\PYG{p}{(}\PYG{n}{np\PYGZus{}pointsj}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}\PYG{p}{)}
+
+\PYG{c}{\PYGZsh{}    compare same line, will identify a line of zero length if true}
+            \PYG{k}{if} \PYG{n}{i} \PYG{o}{==} \PYG{n}{j}\PYG{p}{:}
+                \PYG{n}{d} \PYG{o}{=} \PYG{n}{disteuc}\PYG{p}{(}\PYG{n}{r1}\PYG{p}{,} \PYG{n}{r2}\PYG{p}{)}
+                \PYG{k}{if} \PYG{n}{d} \PYG{o}{==} \PYG{l+m+mi}{0}\PYG{p}{:}
+                    \PYG{n}{exist2} \PYG{o}{=} \PYG{n+nb+bp}{True}
+            \PYG{k}{else}\PYG{p}{:}
+                \PYG{n}{d} \PYG{o}{=} \PYG{n}{disteuc}\PYG{p}{(}\PYG{n}{r1}\PYG{p}{,} \PYG{n}{s1}\PYG{p}{)}
+                \PYG{k}{if} \PYG{n}{d} \PYG{o}{==} \PYG{l+m+mi}{0}\PYG{p}{:}
+                    \PYG{n}{exist1} \PYG{o}{=} \PYG{n+nb+bp}{True}
+                \PYG{n}{d} \PYG{o}{=} \PYG{n}{disteuc}\PYG{p}{(}\PYG{n}{r1}\PYG{p}{,} \PYG{n}{s2}\PYG{p}{)}
+                \PYG{k}{if} \PYG{n}{d} \PYG{o}{==} \PYG{l+m+mi}{0}\PYG{p}{:}
+                    \PYG{n}{exist1} \PYG{o}{=} \PYG{n+nb+bp}{True}
+                \PYG{n}{d} \PYG{o}{=} \PYG{n}{disteuc}\PYG{p}{(}\PYG{n}{r2}\PYG{p}{,} \PYG{n}{s1}\PYG{p}{)}
+                \PYG{k}{if} \PYG{n}{d} \PYG{o}{==} \PYG{l+m+mi}{0}\PYG{p}{:}
+                    \PYG{n}{exist2} \PYG{o}{=} \PYG{n+nb+bp}{True}
+                \PYG{n}{d} \PYG{o}{=} \PYG{n}{disteuc}\PYG{p}{(}\PYG{n}{r2}\PYG{p}{,} \PYG{n}{s2}\PYG{p}{)}
+                \PYG{k}{if} \PYG{n}{d} \PYG{o}{==} \PYG{l+m+mi}{0}\PYG{p}{:}
+                    \PYG{n}{exist2} \PYG{o}{=} \PYG{n+nb+bp}{True}
+        \PYG{k}{if} \PYG{n}{exist1} \PYG{o+ow}{is} \PYG{n+nb+bp}{False}\PYG{p}{:}
+            \PYG{n}{G}\PYG{p}{[}\PYG{n}{a}\PYG{p}{]}\PYG{o}{.}\PYG{n}{add\PYGZus{}node}\PYG{p}{(}\PYG{n}{nnodes}\PYG{p}{,} \PYG{n}{coord}\PYG{o}{=}\PYG{n}{r1}\PYG{p}{,} \PYG{n}{inten}\PYG{o}{=}\PYG{n}{inten1}\PYG{p}{)}
+            \PYG{n}{nnodes} \PYG{o}{+=} \PYG{l+m+mi}{1}
+        \PYG{k}{if} \PYG{n}{exist2} \PYG{o+ow}{is} \PYG{n+nb+bp}{False}\PYG{p}{:}
+            \PYG{n}{G}\PYG{p}{[}\PYG{n}{a}\PYG{p}{]}\PYG{o}{.}\PYG{n}{add\PYGZus{}node}\PYG{p}{(}\PYG{n}{nnodes}\PYG{p}{,} \PYG{n}{coord}\PYG{o}{=}\PYG{n}{r2}\PYG{p}{,} \PYG{n}{inten}\PYG{o}{=}\PYG{n}{inten2}\PYG{p}{)}
+            \PYG{n}{nnodes} \PYG{o}{+=} \PYG{l+m+mi}{1}
+\PYG{c}{\PYGZsh{}    for every node identified in the list of nnodes, compare each line in}
+\PYG{c}{\PYGZsh{}    that cell with that node to identify the edges}
+    \PYG{k}{for} \PYG{n}{i} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{num\PYGZus{}lines}\PYG{p}{):}
+        \PYG{n}{EDL} \PYG{o}{=} \PYG{l+m+mi}{0}
+        \PYG{n}{line1} \PYG{o}{=} \PYG{n}{data}\PYG{o}{.}\PYG{n}{GetCell}\PYG{p}{(}\PYG{n}{i}\PYG{p}{)}\PYG{o}{.}\PYG{n}{GetPoints}\PYG{p}{()}
+        \PYG{n}{np\PYGZus{}pointsi} \PYG{o}{=} \PYG{n}{line1}\PYG{o}{.}\PYG{n}{GetNumberOfPoints}\PYG{p}{()}
+        \PYG{n}{r1} \PYG{o}{=} \PYG{n}{line1}\PYG{o}{.}\PYG{n}{GetPoint}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{)}
+        \PYG{n}{r2} \PYG{o}{=} \PYG{n}{line1}\PYG{o}{.}\PYG{n}{GetPoint}\PYG{p}{(}\PYG{n}{np\PYGZus{}pointsi}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}\PYG{p}{)}
+        \PYG{n}{pointID} \PYG{o}{=} \PYG{n}{data}\PYG{o}{.}\PYG{n}{GetCell}\PYG{p}{(}\PYG{n}{i}\PYG{p}{)}\PYG{o}{.}\PYG{n}{GetPointIds}\PYG{p}{()}
+        \PYG{n}{mdpt} \PYG{o}{=} \PYG{p}{(}
+            \PYG{p}{(}\PYG{n}{r1}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{o}{+}\PYG{n}{r2}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{])} \PYG{o}{/} \PYG{l+m+mi}{2}\PYG{p}{,} \PYG{p}{(}\PYG{n}{r1}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]}\PYG{o}{+}\PYG{n}{r2}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{])} \PYG{o}{/} \PYG{l+m+mi}{2}\PYG{p}{,} \PYG{p}{(}\PYG{n}{r1}\PYG{p}{[}\PYG{l+m+mi}{2}\PYG{p}{]}\PYG{o}{+}\PYG{n}{r2}\PYG{p}{[}\PYG{l+m+mi}{2}\PYG{p}{])} \PYG{o}{/} \PYG{l+m+mi}{2}\PYG{p}{)}
+
+\PYG{c}{\PYGZsh{}   for each line sum thru the line the distance between points to}
+\PYG{c}{\PYGZsh{}   get edge len EDL}
+        \PYG{n}{EDL} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{sum}\PYG{p}{(}
+            \PYG{p}{[}\PYG{n}{disteuc}\PYG{p}{(}\PYG{n}{line1}\PYG{o}{.}\PYG{n}{GetPoint}\PYG{p}{(}\PYG{n}{pid}\PYG{p}{),} \PYG{n}{line1}\PYG{o}{.}\PYG{n}{GetPoint}\PYG{p}{(}\PYG{n}{pid}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}\PYG{p}{))}
+             \PYG{k}{for} \PYG{n}{pid} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{np\PYGZus{}pointsi}\PYG{p}{)])}
+
+        \PYG{k}{for} \PYG{n}{j} \PYG{o+ow}{in} \PYG{n}{G}\PYG{p}{[}\PYG{n}{a}\PYG{p}{]}\PYG{o}{.}\PYG{n}{nodes\PYGZus{}iter}\PYG{p}{():}
+            \PYG{n}{nod} \PYG{o}{=} \PYG{n}{G}\PYG{p}{[}\PYG{n}{a}\PYG{p}{]}\PYG{o}{.}\PYG{n}{node}\PYG{p}{[}\PYG{n}{j}\PYG{p}{]}
+            \PYG{n}{r} \PYG{o}{=} \PYG{n}{nod}\PYG{p}{[}\PYG{l+s}{\PYGZsq{}coord\PYGZsq{}}\PYG{p}{]}
+            \PYG{n}{d} \PYG{o}{=} \PYG{n}{disteuc}\PYG{p}{(}\PYG{n}{r}\PYG{p}{,} \PYG{n}{r1}\PYG{p}{)}
+            \PYG{k}{if} \PYG{n}{d} \PYG{o}{==} \PYG{l+m+mi}{0}\PYG{p}{:}
+                \PYG{n}{n1} \PYG{o}{=} \PYG{n}{j}
+            \PYG{n}{d} \PYG{o}{=} \PYG{n}{disteuc}\PYG{p}{(}\PYG{n}{r}\PYG{p}{,} \PYG{n}{r2}\PYG{p}{)}
+            \PYG{k}{if} \PYG{n}{d} \PYG{o}{==} \PYG{l+m+mi}{0}\PYG{p}{:}
+                \PYG{n}{n2} \PYG{o}{=} \PYG{n}{j}
+        \PYG{n}{G}\PYG{p}{[}\PYG{n}{a}\PYG{p}{]}\PYG{o}{.}\PYG{n}{add\PYGZus{}edge}\PYG{p}{(}
+            \PYG{n}{n1}\PYG{p}{,} \PYG{n}{n2}\PYG{p}{,} \PYG{n}{weight}\PYG{o}{=}\PYG{n}{EDL}\PYG{p}{,} \PYG{n}{cellID}\PYG{o}{=}\PYG{n}{i}\PYG{p}{,} \PYG{n}{midpoint}\PYG{o}{=}\PYG{n}{mdpt}\PYG{p}{)}
+			
+\PYG{c}{\PYGZsh{}           OUTPUT number of nodes,edges, and total Length}
+    \PYG{n}{deg} \PYG{o}{=} \PYG{n}{nx}\PYG{o}{.}\PYG{n}{degree}\PYG{p}{(}\PYG{n}{G}\PYG{p}{[}\PYG{n}{a}\PYG{p}{])}
+    \PYG{k}{for} \PYG{n}{i} \PYG{o+ow}{in} \PYG{n}{G}\PYG{p}{[}\PYG{n}{a}\PYG{p}{]}\PYG{o}{.}\PYG{n}{nodes\PYGZus{}iter}\PYG{p}{():}
+        \PYG{n}{G}\PYG{p}{[}\PYG{n}{a}\PYG{p}{]}\PYG{o}{.}\PYG{n}{node}\PYG{p}{[}\PYG{n}{i}\PYG{p}{][}\PYG{l+s}{\PYGZsq{}degree\PYGZsq{}}\PYG{p}{]} \PYG{o}{=} \PYG{n}{deg}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}
+    \PYG{n}{x} \PYG{o}{=} \PYG{n}{G}\PYG{p}{[}\PYG{n}{a}\PYG{p}{]}\PYG{o}{.}\PYG{n}{nodes}\PYG{p}{(}\PYG{n}{data}\PYG{o}{=}\PYG{n+nb+bp}{True}\PYG{p}{)}
+    \PYG{n}{X}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{n}{x}\PYG{p}{)}
+    \PYG{n}{y} \PYG{o}{=} \PYG{n}{G}\PYG{p}{[}\PYG{n}{a}\PYG{p}{]}\PYG{o}{.}\PYG{n}{edges}\PYG{p}{(}\PYG{n}{data}\PYG{o}{=}\PYG{n+nb+bp}{True}\PYG{p}{)}
+    \PYG{n}{Y}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{n}{y}\PYG{p}{)}
+
+    \PYG{n}{OUT} \PYG{o}{=} \PYG{p}{(}\PYG{n}{X}\PYG{p}{,} \PYG{n}{Y}\PYG{p}{,} \PYG{n}{G}\PYG{p}{)}
+    \PYG{n}{media} \PYG{o}{=} \PYG{n}{os}\PYG{o}{.}\PYG{n}{getcwd}\PYG{p}{()}\PYG{o}{.}\PYG{n}{rsplit}\PYG{p}{(}\PYG{l+s}{\PYGZsq{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,} \PYG{l+m+mi}{1}\PYG{p}{)}
+    \PYG{n}{FILENAME} \PYG{o}{=} \PYG{n}{os}\PYG{o}{.}\PYG{n}{path}\PYG{o}{.}\PYG{n}{join}\PYG{p}{(}\PYG{n}{os}\PYG{o}{.}\PYG{n}{getcwd}\PYG{p}{(),} \PYG{l+s}{\PYGZsq{}}\PYG{l+s+si}{\PYGZpc{}s}\PYG{l+s}{\PYGZus{}grph.pkl\PYGZsq{}} \PYG{o}{\PYGZpc{}} \PYG{n}{media}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{])}
+    \PYG{k}{with} \PYG{n+nb}{open}\PYG{p}{(}\PYG{n}{FILENAME}\PYG{p}{,} \PYG{l+s}{\PYGZsq{}wb\PYGZsq{}}\PYG{p}{)} \PYG{k}{as} \PYG{n}{OUTPUT}\PYG{p}{:}
+        \PYG{n}{pickle}\PYG{o}{.}\PYG{n}{dump}\PYG{p}{(}\PYG{n}{OUT}\PYG{p}{,} \PYG{n}{OUTPUT}\PYG{p}{)}
+\end{Verbatim}

@@ -1,0 +1,12 @@
+\documentclass{article}
+\usepackage{caption,subcaption}
+\begin{document}
+\begin{figure}
+  \hfill\subcaptionbox{A subfigure\label{fig:1a}}[8em]{\centering \rule{5pt}{3em}}
+  \hfill\subcaptionbox{Another subfigure\label{fig:1b}}{\centering \rule{10em}{2em}}
+  \hfill\subcaptionbox{A final subfigure\label{fig:1c}}[9em]{\centering \rule{2em}{4em}}
+  \hfill\null
+  \caption{A figure}\label{fig:1}
+\end{figure}
+Look at Figure~\ref{fig:1a} and~\ref{fig:1b}, or even Figure~\ref{fig:1c}. Everything is contained in Figure~\ref{fig:1}.
+\end{document}

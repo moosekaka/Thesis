@@ -1,0 +1,112 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{l+s+sd}{\PYGZdq{}\PYGZdq{}\PYGZdq{}}
+\PYG{l+s+sd}{    Build vtk skel files with normalized values for DY using TVTK}
+\PYG{l+s+sd}{\PYGZdq{}\PYGZdq{}\PYGZdq{}}
+\PYG{k+kn}{import} \PYG{n+nn}{glob}
+\PYG{k+kn}{import} \PYG{n+nn}{os}
+\PYG{k+kn}{import} \PYG{n+nn}{numpy} \PYG{k+kn}{as} \PYG{n+nn}{np}
+\PYG{k+kn}{import} \PYG{n+nn}{cPickle} \PYG{k+kn}{as} \PYG{n+nn}{pickle}
+\PYG{k+kn}{from} \PYG{n+nn}{tvtk.api} \PYG{k+kn}{import} \PYG{n}{tvtk}
+\PYG{c}{\PYGZsh{} pylint: disable=C0103}
+\PYG{n}{backgroundGFP} \PYG{o}{=} \PYG{p}{\PYGZob{}\PYGZcb{}}
+\PYG{n}{backgroundRFP} \PYG{o}{=} \PYG{p}{\PYGZob{}\PYGZcb{}}
+\PYG{n}{Type} \PYG{o}{=} \PYG{p}{\PYGZob{}\PYGZcb{}}
+\PYG{n}{Dates} \PYG{o}{=} \PYG{p}{\PYGZob{}\PYGZcb{}}
+\PYG{n}{minmaxRFP} \PYG{o}{=} \PYG{p}{[]}
+\PYG{n}{minmaxGFP} \PYG{o}{=} \PYG{p}{[]}
+\PYG{n}{dates} \PYG{o}{=} \PYG{p}{[]}
+\PYG{n}{bckgrndGFP} \PYG{o}{=} \PYG{p}{[]}
+\PYG{n}{bckgrndRFP} \PYG{o}{=} \PYG{p}{[]}
+\PYG{n}{parDir} \PYG{o}{=} \PYG{n}{os}\PYG{o}{.}\PYG{n}{path}\PYG{o}{.}\PYG{n}{dirname}\PYG{p}{(}\PYG{n}{os}\PYG{o}{.}\PYG{n}{getcwd}\PYG{p}{())}
+\PYG{n}{parparDir} \PYG{o}{=} \PYG{n}{os}\PYG{o}{.}\PYG{n}{path}\PYG{o}{.}\PYG{n}{dirname}\PYG{p}{(}\PYG{n}{parDir}\PYG{p}{)}
+\PYG{n}{b} \PYG{o}{=} \PYG{n}{os}\PYG{o}{.}\PYG{n}{getcwd}\PYG{p}{()}
+\PYG{n}{files} \PYG{o}{=} \PYG{n}{glob}\PYG{o}{.}\PYG{n}{glob}\PYG{p}{(}\PYG{n}{os}\PYG{o}{.}\PYG{n}{getcwd}\PYG{p}{()}\PYG{o}{+}\PYG{l+s}{\PYGZsq{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s}{*vtk\PYGZsq{}}\PYG{p}{)}
+\PYG{k}{with} \PYG{n+nb}{open}\PYG{p}{(}\PYG{n}{parparDir}\PYG{o}{+}\PYG{l+s}{\PYGZsq{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s}{\PYGZsq{}}\PYG{o}{+}\PYG{l+s}{\PYGZsq{}fileMetas.pkl\PYGZsq{}}\PYG{p}{,} \PYG{l+s}{\PYGZsq{}rb\PYGZsq{}}\PYG{p}{)} \PYG{k}{as} \PYG{n}{inpt}\PYG{p}{:}
+    \PYG{n}{s} \PYG{o}{=} \PYG{n}{pickle}\PYG{o}{.}\PYG{n}{load}\PYG{p}{(}\PYG{n}{inpt}\PYG{p}{)}
+\PYG{c}{\PYGZsh{} pylint: enable=C0103}
+
+\PYG{k}{for} \PYG{n}{i} \PYG{o+ow}{in} \PYG{n}{s}\PYG{p}{:}
+    \PYG{n}{backgroundRFP}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]} \PYG{o}{=} \PYG{n}{s}\PYG{p}{[}\PYG{n}{i}\PYG{p}{][}\PYG{l+m+mi}{0}\PYG{p}{]}
+    \PYG{n}{backgroundGFP}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]} \PYG{o}{=} \PYG{n}{s}\PYG{p}{[}\PYG{n}{i}\PYG{p}{][}\PYG{l+m+mi}{1}\PYG{p}{]}
+
+\PYG{c}{\PYGZsh{}       Read raw vtk files as input}
+\PYG{k}{for} \PYG{n}{a} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{files}\PYG{p}{)):}
+    \PYG{k}{print}\PYG{l+s}{\PYGZdq{}working...\PYGZdq{}}
+    \PYG{n}{reader} \PYG{o}{=} \PYG{n}{tvtk}\PYG{o}{.}\PYG{n}{PolyDataReader}\PYG{p}{()}
+    \PYG{n}{reader}\PYG{o}{.}\PYG{n}{set}\PYG{p}{(}\PYG{n}{file\PYGZus{}name}\PYG{o}{=}\PYG{n}{files}\PYG{p}{[}\PYG{n}{a}\PYG{p}{])}
+    \PYG{n}{reader}\PYG{o}{.}\PYG{n}{update}\PYG{p}{()}
+    \PYG{n}{data} \PYG{o}{=} \PYG{n}{reader}\PYG{o}{.}\PYG{n}{output}
+    \PYG{n}{temp} \PYG{o}{=} \PYG{n}{data}\PYG{o}{.}\PYG{n}{point\PYGZus{}data}
+    \PYG{n}{rawGFP} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{ravel}\PYG{p}{(}\PYG{n}{temp}\PYG{o}{.}\PYG{n}{get\PYGZus{}array}\PYG{p}{(}\PYG{l+s}{\PYGZsq{}rGFP\PYGZsq{}}\PYG{p}{))}
+    \PYG{n}{rawRFP} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{ravel}\PYG{p}{(}\PYG{n}{temp}\PYG{o}{.}\PYG{n}{get\PYGZus{}array}\PYG{p}{(}\PYG{l+s}{\PYGZsq{}rRFP\PYGZsq{}}\PYG{p}{))}
+    \PYG{n}{tubeWidth} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{ravel}\PYG{p}{(}\PYG{n}{temp}\PYG{o}{.}\PYG{n}{get\PYGZus{}array}\PYG{p}{(}\PYG{l+s}{\PYGZsq{}Width\PYGZsq{}}\PYG{p}{))}
+    \PYG{n}{fileKey} \PYG{o}{=} \PYG{n}{files}\PYG{p}{[}\PYG{n}{a}\PYG{p}{]}\PYG{o}{.}\PYG{n}{rsplit}\PYG{p}{(}\PYG{l+s}{\PYGZsq{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,} \PYG{l+m+mi}{1}\PYG{p}{)[}\PYG{l+m+mi}{1}\PYG{p}{][:}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{13}\PYG{p}{]}
+    \PYG{n}{minmaxRFP}\PYG{o}{.}\PYG{n}{append}\PYG{p}{((}\PYG{n+nb}{min}\PYG{p}{(}\PYG{n}{rawRFP}\PYG{p}{),} \PYG{n+nb}{max}\PYG{p}{(}\PYG{n}{rawRFP}\PYG{p}{)))}
+    \PYG{n}{minmaxGFP}\PYG{o}{.}\PYG{n}{append}\PYG{p}{((}\PYG{n+nb}{min}\PYG{p}{(}\PYG{n}{rawGFP}\PYG{p}{),} \PYG{n+nb}{max}\PYG{p}{(}\PYG{n}{rawGFP}\PYG{p}{)))}
+    \PYG{k}{if} \PYG{n}{backgroundRFP}\PYG{p}{[}\PYG{n}{fileKey}\PYG{p}{]} \PYG{o}{\PYGZgt{}} \PYG{n}{minmaxRFP}\PYG{p}{[}\PYG{n}{a}\PYG{p}{][}\PYG{l+m+mi}{0}\PYG{p}{]:}
+
+        \PYG{c}{\PYGZsh{}   ensures minimum values of 1 to avoid big divisions}
+        \PYG{n}{minA} \PYG{o}{=} \PYG{n}{minmaxRFP}\PYG{p}{[}\PYG{n}{a}\PYG{p}{][}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}
+    \PYG{k}{else}\PYG{p}{:}
+        \PYG{c}{\PYGZsh{}   ensures minimum values of 1 to avoid big divisions}
+        \PYG{n}{minA} \PYG{o}{=} \PYG{n}{backgroundRFP}\PYG{p}{[}\PYG{n}{fileKey}\PYG{p}{]}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}
+
+    \PYG{n}{minB} \PYG{o}{=} \PYG{n+nb}{min}\PYG{p}{(}\PYG{n}{backgroundGFP}\PYG{p}{[}\PYG{n}{fileKey}\PYG{p}{],} \PYG{n}{minmaxGFP}\PYG{p}{[}\PYG{n}{a}\PYG{p}{][}\PYG{l+m+mi}{0}\PYG{p}{])}
+    \PYG{n}{bckgrndGFP}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{n}{minB}\PYG{p}{)}
+    \PYG{n}{bckgrndRFP}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{n}{minA}\PYG{p}{)}
+
+\PYG{c}{\PYGZsh{}   Normalize}
+    \PYG{n}{pts} \PYG{o}{=} \PYG{n}{data}\PYG{o}{.}\PYG{n}{points}
+    \PYG{n}{lns} \PYG{o}{=} \PYG{n}{data}\PYG{o}{.}\PYG{n}{lines}
+    \PYG{n}{pointIds} \PYG{o}{=} \PYG{p}{[]}
+    \PYG{n}{lines} \PYG{o}{=} \PYG{p}{[]}
+\PYG{c}{\PYGZsh{}   method for getting pointIds as unique list}
+    \PYG{k}{for} \PYG{n}{el} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{data}\PYG{o}{.}\PYG{n}{number\PYGZus{}of\PYGZus{}lines}\PYG{p}{):}
+        \PYG{n}{temp} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{ravel}\PYG{p}{(}\PYG{n}{data}\PYG{o}{.}\PYG{n}{get\PYGZus{}cell}\PYG{p}{(}\PYG{n}{el}\PYG{p}{)}\PYG{o}{.}\PYG{n}{point\PYGZus{}ids}\PYG{p}{)}
+        \PYG{n}{lines}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{n}{temp}\PYG{p}{)}
+    \PYG{n}{pointIds} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{unique}\PYG{p}{([}\PYG{n}{el} \PYG{k}{for} \PYG{n}{ln} \PYG{o+ow}{in} \PYG{n}{lines} \PYG{k}{for} \PYG{n}{el} \PYG{o+ow}{in} \PYG{n}{ln}\PYG{p}{])}
+
+\PYG{c}{\PYGZsh{}   background Substract}
+    \PYG{n}{A} \PYG{o}{=} \PYG{n}{rawRFP}\PYG{o}{\PYGZhy{}}\PYG{n}{minA}
+    \PYG{n}{B} \PYG{o}{=} \PYG{n}{rawGFP}\PYG{o}{\PYGZhy{}}\PYG{n}{minB}
+    \PYG{n}{minAb} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{min}\PYG{p}{(}\PYG{n}{A}\PYG{p}{)}
+\PYG{c}{\PYGZsh{}    width equivalent}
+    \PYG{n}{W} \PYG{o}{=} \PYG{n}{A}\PYG{o}{/}\PYG{n}{minAb}
+\PYG{c}{\PYGZsh{}   raw DY/W normalized values}
+    \PYG{n}{DY} \PYG{o}{=} \PYG{n}{B}\PYG{o}{/}\PYG{n}{W}
+\PYG{c}{\PYGZsh{}   rescale DY to minmax}
+    \PYG{n}{minDY} \PYG{o}{=} \PYG{n+nb}{min}\PYG{p}{([}\PYG{n}{DY}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]} \PYG{k}{for} \PYG{n}{i} \PYG{o+ow}{in} \PYG{n}{pointIds}\PYG{p}{])}
+    \PYG{n}{maxDY} \PYG{o}{=} \PYG{n+nb}{max}\PYG{p}{([}\PYG{n}{DY}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]} \PYG{k}{for} \PYG{n}{i} \PYG{o+ow}{in} \PYG{n}{pointIds}\PYG{p}{])}
+    \PYG{n}{normDY} \PYG{o}{=} \PYG{p}{((}\PYG{n}{DY}\PYG{o}{\PYGZhy{}}\PYG{n}{minDY}\PYG{p}{)}\PYG{o}{/}\PYG{p}{(}\PYG{n}{maxDY}\PYG{o}{\PYGZhy{}}\PYG{n}{minDY}\PYG{p}{))}
+
+\PYG{c}{\PYGZsh{}           Make VTK file}
+    \PYG{n}{polyData} \PYG{o}{=} \PYG{n}{tvtk}\PYG{o}{.}\PYG{n}{PolyData}\PYG{p}{()}
+    \PYG{n}{polyData}\PYG{o}{.}\PYG{n}{points} \PYG{o}{=} \PYG{n}{pts}
+    \PYG{n}{polyData}\PYG{o}{.}\PYG{n}{lines} \PYG{o}{=} \PYG{n}{lns}
+    \PYG{n}{polyData}\PYG{o}{.}\PYG{n}{point\PYGZus{}data}\PYG{o}{.}\PYG{n}{scalars} \PYG{o}{=} \PYG{n}{normDY}
+    \PYG{n}{polyData}\PYG{o}{.}\PYG{n}{point\PYGZus{}data}\PYG{o}{.}\PYG{n}{scalars}\PYG{o}{.}\PYG{n}{name} \PYG{o}{=} \PYG{l+s}{\PYGZsq{}DY\PYGZus{}minmax\PYGZsq{}}
+    \PYG{n}{polyData}\PYG{o}{.}\PYG{n}{point\PYGZus{}data}\PYG{o}{.}\PYG{n}{add\PYGZus{}array}\PYG{p}{(}\PYG{n}{W}\PYG{p}{)}
+    \PYG{n}{polyData}\PYG{o}{.}\PYG{n}{point\PYGZus{}data}\PYG{o}{.}\PYG{n}{get\PYGZus{}array}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{)}\PYG{o}{.}\PYG{n}{name} \PYG{o}{=} \PYG{l+s}{\PYGZsq{}WidthEq\PYGZsq{}}
+    \PYG{n}{polyData}\PYG{o}{.}\PYG{n}{point\PYGZus{}data}\PYG{o}{.}\PYG{n}{add\PYGZus{}array}\PYG{p}{(}\PYG{n}{DY}\PYG{p}{)}
+    \PYG{n}{polyData}\PYG{o}{.}\PYG{n}{point\PYGZus{}data}\PYG{o}{.}\PYG{n}{get\PYGZus{}array}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{)}\PYG{o}{.}\PYG{n}{name} \PYG{o}{=} \PYG{l+s}{\PYGZsq{}DY\PYGZus{}raw\PYGZsq{}}
+    \PYG{n}{polyData}\PYG{o}{.}\PYG{n}{point\PYGZus{}data}\PYG{o}{.}\PYG{n}{add\PYGZus{}array}\PYG{p}{(}\PYG{n}{rawRFP}\PYG{p}{)}
+    \PYG{n}{polyData}\PYG{o}{.}\PYG{n}{point\PYGZus{}data}\PYG{o}{.}\PYG{n}{get\PYGZus{}array}\PYG{p}{(}\PYG{l+m+mi}{3}\PYG{p}{)}\PYG{o}{.}\PYG{n}{name} \PYG{o}{=} \PYG{l+s}{\PYGZsq{}rRFP\PYGZsq{}}
+    \PYG{n}{polyData}\PYG{o}{.}\PYG{n}{point\PYGZus{}data}\PYG{o}{.}\PYG{n}{add\PYGZus{}array}\PYG{p}{(}\PYG{n}{rawGFP}\PYG{p}{)}
+    \PYG{n}{polyData}\PYG{o}{.}\PYG{n}{point\PYGZus{}data}\PYG{o}{.}\PYG{n}{get\PYGZus{}array}\PYG{p}{(}\PYG{l+m+mi}{4}\PYG{p}{)}\PYG{o}{.}\PYG{n}{name} \PYG{o}{=} \PYG{l+s}{\PYGZsq{}rGFP\PYGZsq{}}
+    \PYG{n}{polyData}\PYG{o}{.}\PYG{n}{point\PYGZus{}data}\PYG{o}{.}\PYG{n}{add\PYGZus{}array}\PYG{p}{(}\PYG{n}{A}\PYG{p}{)}
+    \PYG{n}{polyData}\PYG{o}{.}\PYG{n}{point\PYGZus{}data}\PYG{o}{.}\PYG{n}{get\PYGZus{}array}\PYG{p}{(}\PYG{l+m+mi}{5}\PYG{p}{)}\PYG{o}{.}\PYG{n}{name} \PYG{o}{=} \PYG{l+s}{\PYGZsq{}bkstRFP\PYGZsq{}}
+    \PYG{n}{polyData}\PYG{o}{.}\PYG{n}{point\PYGZus{}data}\PYG{o}{.}\PYG{n}{add\PYGZus{}array}\PYG{p}{(}\PYG{n}{B}\PYG{p}{)}
+    \PYG{n}{polyData}\PYG{o}{.}\PYG{n}{point\PYGZus{}data}\PYG{o}{.}\PYG{n}{get\PYGZus{}array}\PYG{p}{(}\PYG{l+m+mi}{6}\PYG{p}{)}\PYG{o}{.}\PYG{n}{name} \PYG{o}{=} \PYG{l+s}{\PYGZsq{}bkstGFP\PYGZsq{}}
+    \PYG{n}{polyData}\PYG{o}{.}\PYG{n}{point\PYGZus{}data}\PYG{o}{.}\PYG{n}{update}\PYG{p}{()}
+    \PYG{n}{polyData}\PYG{o}{.}\PYG{n}{point\PYGZus{}data}\PYG{o}{.}\PYG{n}{add\PYGZus{}array}\PYG{p}{(}\PYG{n}{tubeWidth}\PYG{p}{)}
+    \PYG{n}{polyData}\PYG{o}{.}\PYG{n}{point\PYGZus{}data}\PYG{o}{.}\PYG{n}{get\PYGZus{}array}\PYG{p}{(}\PYG{l+m+mi}{7}\PYG{p}{)}\PYG{o}{.}\PYG{n}{name} \PYG{o}{=} \PYG{l+s}{\PYGZsq{}tubeWidth\PYGZsq{}}
+    \PYG{n}{polyData}\PYG{o}{.}\PYG{n}{point\PYGZus{}data}\PYG{o}{.}\PYG{n}{update}\PYG{p}{()}
+\PYG{c}{\PYGZsh{}           Output}
+    \PYG{n}{writer} \PYG{o}{=} \PYG{n}{tvtk}\PYG{o}{.}\PYG{n}{PolyDataWriter}\PYG{p}{()}
+    \PYG{n}{fileString} \PYG{o}{=} \PYG{n}{os}\PYG{o}{.}\PYG{n}{getcwd}\PYG{p}{()}\PYG{o}{+}\PYG{l+s}{\PYGZsq{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s}{Norm\PYGZus{}\PYGZsq{}}\PYG{o}{+}\PYG{n}{fileKey}\PYG{o}{+}\PYG{l+s}{\PYGZsq{}\PYGZus{}skeleton.vtk\PYGZsq{}}
+    \PYG{n}{writer} \PYG{o}{=} \PYG{n}{tvtk}\PYG{o}{.}\PYG{n}{PolyDataWriter}\PYG{p}{()}
+    \PYG{n}{writer}\PYG{o}{.}\PYG{n}{set}\PYG{p}{(}\PYG{n}{file\PYGZus{}name}\PYG{o}{=}\PYG{n}{fileString}\PYG{p}{)}
+    \PYG{n}{writer}\PYG{o}{.}\PYG{n}{set\PYGZus{}input}\PYG{p}{(}\PYG{n}{polyData}\PYG{p}{)}
+    \PYG{n}{writer}\PYG{o}{.}\PYG{n}{update}\PYG{p}{()}
+    \PYG{k}{print}\PYG{l+s}{\PYGZdq{}done!\PYGZdq{}}
+\end{Verbatim}

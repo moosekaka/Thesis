@@ -1,0 +1,15 @@
+\chapter{Source codes}
+Listed here are5y a selection of source codes used in this thesis. 
+\section{Structure-function pipeline modules}
+These three modules represent the source codes used to generate the structure-function map of the mitochondrial network.
+\inputminted[xleftmargin=2em, linenos, breaklines, fontsize=\footnotesize, baselinestretch=1, stepnumber=5]{Python}{steponepipeline.py}
+%
+\inputminted[xleftmargin=2em,fontsize=\footnotesize, baselinestretch=.9,linenos,stepnumber=5]{Python}{steptwopipeline.py}
+%
+\inputminted[xleftmargin=2em,fontsize=\footnotesize, baselinestretch=.9,linenos,stepnumber=5]{Python}{steptreepipeline.py}
+%
+\section{Multi-scale database module}
+\inputminted[xleftmargin=2em,fontsize=\footnotesize, baselinestretch=.9,linenos,stepnumber=5, lastline=323]{Python}{mungedata.py}
+\section{Mother-daughter transformation module}
+\inputminted[xleftmargin=2em,fontsize=\footnotesize, baselinestretch=.9,linenos,stepnumber=5]{Python}{transformbud.py}
+

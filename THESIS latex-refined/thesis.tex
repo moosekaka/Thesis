@@ -1,0 +1,144 @@
+% This is a template for Ph.D. dissertations in the UCI format.
+% 
+% All fonts, including those for sub- and superscripts, must be 10
+% points or larger.  Recommended sizes are 14-point for chapter
+% headings, 12-point for the main body of text and figure/table
+% titles, and 10-point for footnotes, sub- and super-scripts, and text
+% in figures and tables.
+
+\documentclass[12pt]{ucithesis}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage[document]{ragged2e}
+\usepackage{fontspec}
+\defaultfontfeatures{Ligatures=TeX}
+\setmainfont{TeX Gyre Pagella}
+\usepackage{mathtools}
+\usepackage{unicode-math}
+\setmathfont{TeX Gyre Pagella Math}
+\usepackage[Latin,Greek]{ucharclasses}
+\newfontfamily\greekfont{GFS Didot}[BoldFont={* Bold},
+ItalicFont={* Italic}, Scale=MatchLowercase]
+\setTransitionsForGreek{\begingroup\greekfont}{\endgroup}
+\setmathfont{GFS Didot Italic}[range=it/{greek,Greek}]
+\setmathfont{GFS Didot}[range=up/{greek,Greek}]
+% A few common packages
+\usepackage{array}
+\usepackage{graphicx}
+%\usepackage{amsmath}
+%\usepackage{amsthm}
+\usepackage[font=footnotesize]{caption,subcaption}
+\captionsetup{indention=1.5em,
+						   labelformat=simple,
+						   labelfont={bf,small},
+						   singlelinecheck=false}
+\usepackage{longtable}
+\usepackage{booktabs}
+
+% plainpages=false fixes the "duplicate ignored" error with page counters
+% Set pdfborder to 0 0 0 to disable colored borders around PDF hyperlinks
+\usepackage[plainpages=false,pdfborder={0 0 0}]{hyperref}
+
+% My installed packages
+\usepackage[newfloat]{minted}
+\usepackage{seqsplit}
+\usepackage{enumitem}
+\usepackage{url}
+\usepackage[mode=math]{siunitx}
+\usepackage[final]{microtype}
+
+
+% Uncomment the following to avoid "widowing", where page breaks cause
+% single lines of paragraphs to float onto the next page (this is not
+% a UCI requirement but more of an aesthetic choice).
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Modify or extend these at will.
+\newtheorem{theorem}{\textsc{Theorem}}[chapter]
+\newtheorem{definition}{\textsc{Definition}}[chapter]
+\newtheorem{example}{\textsc{Example}}[chapter]
+
+% Macros for title, author, abstract, etc.
+\input{preliminaries}
+
+% Add PDF document info fields
+\hypersetup{
+	pdftitle={\Thesistitle},
+	pdfauthor={\Authorname},
+	pdfsubject={\Degreefield},
+}
+
+% Uncomment the following to have numbered subsubsections (by default
+% numbering goes only to subsections).
+%\setcounter{secnumdepth}{4}
+%custom setups
+
+\sisetup{detect-weight=true,
+                detect-family=true, 
+                math-micro=\text{µ}, 
+                text-micro=µ}
+\DeclareSIUnit\micron{\micro\metre}
+\DeclareSIQualifier\Oxygen{O_2}
+\DeclareSIUnit\OCR{\nmol\Oxygen\per\ml\per\s}
+\usepackage{fancyref}
+\renewcommand{\fancyrefdefaultformat}{plain}
+\fancyrefchangeprefix{\fancyrefchaplabelprefix}{ch}
+\renewcommand\thesubfigure{\Alph{subfigure}}
+
+%macros
+\newcommand{\Vi}{\mathbf{i}}
+\newcommand{\Vj}{\mathbf{j}}
+\newcommand{\Vk}{\mathbf{k}}
+\newcommand{\Vx}{\mathbf{x}}
+\newcommand{\Vy}{\mathbf{y}}
+\newcommand{\Vz}{\mathbf{z}}
+\newcommand{\xhat}{\mathbf{\hat{x_{base}}}}
+\newcommand{\yhat}{\mathbf{\hat{y_{base}}}}
+\newcommand{\zhat}{\mathbf{\hat{z_{base}}}}
+\newcommand{\V}[1]{\textup{#1}}
+\newcolumntype{x}[1]{>{\centering\arraybackslash\hspace{0pt}}p{#1}}
+\extrafloats{30}
+
+% Set this to only select a subset of the includes directives below.
+% Very handy to speed up compilation if you're working on a certain
+% part of your thesis. It conserves page numbers, references, etc.
+% even for non-included files.
+%\includeonly{chapter3}
+\usepackage[notcite,final]{showkeys}
+%\geometry{showframe}
+
+\begin{document}
+\emergencystretch=1.5em
+% Preliminary pages are always loaded (TOC, CV, etc.)
+\preliminarypages
+
+% Include the different components of your thesis, in separate files.
+% Using \include allows you to set \includeonly above.
+\include{chapter1}
+\include{chapter2}
+\include{chapter3}
+\include{chapter4}
+\include{chapter5}
+\include{chapter6}
+\include{chapter7}
+
+% These commands fix an odd problem in which the bibliography line
+% of the Table of Contents shows the wrong page number.
+\clearpage
+\phantomsection
+
+% "References should be formatted in style most common in discipline",
+% abbrv is only a suggestion.
+\bibliographystyle{ieeetr}
+\bibliography{zotero}
+
+% The Thesis Manual says not to include appendix figures and tables in
+% the List of Figures and Tables, respectively, so these commands from
+% the caption package turn it off from this point onwards. If needed,
+% it can be re-enabled later (using list=yes argument).
+\captionsetup[figure]{list=no}
+\captionsetup[table]{list=no}
+
+% If you have an appendix, it should come after the references.
+\include{appendix}
+\end{document}

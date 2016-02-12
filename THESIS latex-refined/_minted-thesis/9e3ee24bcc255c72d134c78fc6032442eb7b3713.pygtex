@@ -1,0 +1,199 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{l+s+sd}{\PYGZdq{}\PYGZdq{}\PYGZdq{}}
+\PYG{l+s+sd}{	Transform and visualize cells along the mother bud axis}
+\PYG{l+s+sd}{\PYGZdq{}\PYGZdq{}\PYGZdq{}}
+\PYG{k+kn}{import} \PYG{n+nn}{os}
+\PYG{k+kn}{import} \PYG{n+nn}{numpy} \PYG{k+kn}{as} \PYG{n+nn}{np}
+\PYG{k+kn}{from} \PYG{n+nn}{mayavi} \PYG{k+kn}{import} \PYG{n}{mlab}
+\PYG{k+kn}{import} \PYG{n+nn}{fnmatch}
+\PYG{k+kn}{import} \PYG{n+nn}{pandas} \PYG{k+kn}{as} \PYG{n+nn}{pd}
+\PYG{k+kn}{from} \PYG{n+nn}{tvtk.api} \PYG{k+kn}{import} \PYG{n}{tvtk}
+\PYG{k+kn}{from} \PYG{n+nn}{collections} \PYG{k+kn}{import} \PYG{n}{defaultdict}
+\PYG{k+kn}{from} \PYG{n+nn}{vtk\PYGZus{}viz} \PYG{k+kn}{import} \PYG{n}{vtkvizfuncs} \PYG{k}{as} \PYG{n}{vz}
+\PYG{k+kn}{import} \PYG{n+nn}{cPickle} \PYG{k+kn}{as} \PYG{n+nn}{pickle}
+\PYG{n}{vtkF} \PYG{o}{=} \PYG{n}{defaultdict}\PYG{p}{(}\PYG{n+nb}{dict}\PYG{p}{)}
+\PYG{n}{mombud} \PYG{o}{=} \PYG{n}{defaultdict}\PYG{p}{(}\PYG{n+nb}{dict}\PYG{p}{)}
+
+\PYG{c}{\PYGZsh{} filelist and graph list}
+\PYG{k}{for} \PYG{n}{root}\PYG{p}{,} \PYG{n}{dirs}\PYG{p}{,} \PYG{n}{files} \PYG{o+ow}{in} \PYG{n}{os}\PYG{o}{.}\PYG{n}{walk}\PYG{p}{(}\PYG{n}{os}\PYG{o}{.}\PYG{n}{getcwd}\PYG{p}{()):}
+    \PYG{k}{for} \PYG{n}{i} \PYG{o+ow}{in} \PYG{n}{files}\PYG{p}{:}
+        \PYG{k}{if} \PYG{n}{fnmatch}\PYG{o}{.}\PYG{n}{fnmatch}\PYG{p}{(}\PYG{n}{i}\PYG{p}{,} \PYG{l+s}{\PYGZsq{}*skeleton.vtk\PYGZsq{}}\PYG{p}{):}
+            \PYG{n}{media} \PYG{o}{=} \PYG{n}{root}\PYG{o}{.}\PYG{n}{rsplit}\PYG{p}{(}\PYG{l+s}{\PYGZsq{}}\PYG{l+s+se}{\PYGZbs{}\PYGZbs{}}\PYG{l+s}{\PYGZsq{}}\PYG{p}{,} \PYG{l+m+mi}{1}\PYG{p}{)[}\PYG{l+m+mi}{1}\PYG{p}{]}
+            \PYG{n}{vtkF}\PYG{p}{[}\PYG{n}{media}\PYG{p}{][}\PYG{n}{i}\PYG{p}{[}\PYG{l+m+mi}{5}\PYG{p}{:}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{13}\PYG{p}{]]} \PYG{o}{=} \PYG{n}{os}\PYG{o}{.}\PYG{n}{path}\PYG{o}{.}\PYG{n}{join}\PYG{p}{(}\PYG{n}{root}\PYG{p}{,} \PYG{n}{i}\PYG{p}{)}
+        \PYG{k}{if} \PYG{n}{fnmatch}\PYG{o}{.}\PYG{n}{fnmatch}\PYG{p}{(}\PYG{n}{i}\PYG{p}{,} \PYG{l+s}{\PYGZsq{}YP*csv\PYGZsq{}}\PYG{p}{):}
+            \PYG{n}{mombud}\PYG{p}{[}\PYG{n}{i}\PYG{p}{[:}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{4}\PYG{p}{]]} \PYG{o}{=} \PYG{n}{os}\PYG{o}{.}\PYG{n}{path}\PYG{o}{.}\PYG{n}{join}\PYG{p}{(}\PYG{n}{root}\PYG{p}{,} \PYG{n}{i}\PYG{p}{)}
+
+\PYG{n}{filekeys} \PYG{o}{=} \PYG{p}{\PYGZob{}}\PYG{n}{item}\PYG{p}{:} \PYG{n}{vtkF}\PYG{p}{[}\PYG{n}{media}\PYG{p}{][}\PYG{n}{item}\PYG{p}{]} \PYG{k}{for} \PYG{n}{media}
+            \PYG{o+ow}{in} \PYG{n+nb}{sorted}\PYG{p}{(}\PYG{n}{vtkF}\PYG{o}{.}\PYG{n}{keys}\PYG{p}{())} \PYG{k}{for} \PYG{n}{item}
+            \PYG{o+ow}{in} \PYG{n+nb}{sorted}\PYG{p}{(}\PYG{n}{vtkF}\PYG{p}{[}\PYG{n}{media}\PYG{p}{]}\PYG{o}{.}\PYG{n}{keys}\PYG{p}{())\PYGZcb{}}
+
+\PYG{n}{DataSize} \PYG{o}{=} \PYG{n}{pd}\PYG{o}{.}\PYG{n}{read\PYGZus{}table}\PYG{p}{(}\PYG{l+s}{\PYGZsq{}Results.txt\PYGZsq{}}\PYG{p}{)}
+\PYG{n}{df} \PYG{o}{=} \PYG{n}{DataSize}\PYG{o}{.}\PYG{n}{ix}\PYG{p}{[:,} \PYG{l+m+mi}{1}\PYG{p}{:]}
+\PYG{n}{df}\PYG{p}{[}\PYG{l+s}{\PYGZsq{}cell\PYGZsq{}}\PYG{p}{]} \PYG{o}{=} \PYG{n}{df}\PYG{o}{.}\PYG{n}{ix}\PYG{p}{[:,} \PYG{l+s}{\PYGZsq{}Label\PYGZsq{}}\PYG{p}{]}\PYG{o}{.}\PYG{n}{apply}\PYG{p}{(}\PYG{k}{lambda} \PYG{n}{x}\PYG{p}{:} \PYG{n}{x}\PYG{o}{.}\PYG{n}{partition}\PYG{p}{(}\PYG{l+s}{\PYGZsq{}:\PYGZsq{}}\PYG{p}{)[}\PYG{l+m+mi}{2}\PYG{p}{])}
+\PYG{n}{df}\PYG{p}{[}\PYG{l+s}{\PYGZsq{}vol\PYGZsq{}}\PYG{p}{]} \PYG{o}{=} \PYG{l+m+mi}{4}\PYG{o}{/}\PYG{l+m+mi}{3} \PYG{o}{*} \PYG{n}{np}\PYG{o}{.}\PYG{n}{pi} \PYG{o}{*} \PYG{p}{(}\PYG{n}{df}\PYG{o}{.}\PYG{n}{Major}\PYG{o}{*.}\PYG{l+m+mo}{055}\PYG{o}{/}\PYG{l+m+mi}{2}\PYG{p}{)} \PYG{o}{*} \PYG{p}{(}\PYG{n}{df}\PYG{o}{.}\PYG{n}{Minor}\PYG{o}{*.}\PYG{l+m+mo}{055}\PYG{o}{/}\PYG{l+m+mi}{2}\PYG{p}{)} \PYG{o}{**} \PYG{l+m+mi}{2}
+
+\PYG{c}{\PYGZsh{} Draw cell using cellplot and edgeplot}
+
+\PYG{k}{if} \PYG{n}{\PYGZus{}\PYGZus{}name\PYGZus{}\PYGZus{}} \PYG{o}{==} \PYG{l+s}{\PYGZdq{}\PYGZus{}\PYGZus{}main\PYGZus{}\PYGZus{}\PYGZdq{}}\PYG{p}{:}
+    \PYG{n}{dfmb} \PYG{o}{=} \PYG{n}{pd}\PYG{o}{.}\PYG{n}{DataFrame}\PYG{p}{(}\PYG{n}{columns}\PYG{o}{=}\PYG{p}{[}\PYG{l+s}{\PYGZsq{}base\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}neck\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}tip\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}media\PYGZsq{}}\PYG{p}{])}
+    \PYG{n}{mlab}\PYG{o}{.}\PYG{n}{close}\PYG{p}{(}\PYG{n+nb}{all}\PYG{o}{=}\PYG{n+nb+bp}{True}\PYG{p}{)}
+    \PYG{k}{for} \PYG{n}{\PYGZus{}}\PYG{p}{,} \PYG{n}{key} \PYG{o+ow}{in} \PYG{n+nb}{enumerate}\PYG{p}{(}\PYG{n+nb}{sorted}\PYG{p}{(}\PYG{n}{mombud}\PYG{o}{.}\PYG{n}{keys}\PYG{p}{())[}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{5}\PYG{p}{:}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{4}\PYG{p}{]):}
+        \PYG{n}{df1} \PYG{o}{=} \PYG{n}{pd}\PYG{o}{.}\PYG{n}{read\PYGZus{}csv}\PYG{p}{(}\PYG{l+s}{\PYGZsq{}}\PYG{l+s+si}{\PYGZpc{}s}\PYG{l+s}{.csv\PYGZsq{}} \PYG{o}{\PYGZpc{}} \PYG{n}{key}\PYG{p}{,}
+                          \PYG{n}{header}\PYG{o}{=}\PYG{l+m+mi}{0}\PYG{p}{,}
+                          \PYG{n}{names}\PYG{o}{=}\PYG{p}{[}\PYG{l+s}{\PYGZsq{}x\PYGZsq{}}\PYG{p}{,} \PYG{l+s}{\PYGZsq{}y\PYGZsq{}}\PYG{p}{,} \PYG{l+s}{\PYGZsq{}z\PYGZsq{}}\PYG{p}{],}
+                          \PYG{n}{index\PYGZus{}col}\PYG{o}{=}\PYG{l+m+mi}{0}\PYG{p}{)}
+        \PYG{n}{tip} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{array}\PYG{p}{(}\PYG{n}{df1}\PYG{o}{.}\PYG{n}{ix}\PYG{p}{[}\PYG{l+s}{\PYGZsq{}tip\PYGZsq{}}\PYG{p}{])}
+        \PYG{n}{base} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{array}\PYG{p}{(}\PYG{n}{df1}\PYG{o}{.}\PYG{n}{ix}\PYG{p}{[}\PYG{l+s}{\PYGZsq{}base\PYGZsq{}}\PYG{p}{])}
+        \PYG{n}{neck} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{array}\PYG{p}{(}\PYG{n}{df1}\PYG{o}{.}\PYG{n}{ix}\PYG{p}{[}\PYG{l+s}{\PYGZsq{}neck\PYGZsq{}}\PYG{p}{])}
+
+        \PYG{n}{filekey} \PYG{o}{=} \PYG{n}{key}
+        \PYG{n}{df2} \PYG{o}{=} \PYG{n}{vz}\PYG{o}{.}\PYG{n}{getelipspar}\PYG{p}{(}\PYG{n}{filekey}\PYG{p}{,} \PYG{n}{df}\PYG{p}{)}
+        \PYG{n}{df2} \PYG{o}{=} \PYG{n}{df2}\PYG{o}{.}\PYG{n}{sort}\PYG{p}{(}\PYG{l+s}{\PYGZsq{}vol\PYGZsq{}}\PYG{p}{)}
+        \PYG{n}{df2}\PYG{o}{.}\PYG{n}{reset\PYGZus{}index}\PYG{p}{(}\PYG{n}{drop}\PYG{o}{=}\PYG{n+nb+bp}{True}\PYG{p}{,} \PYG{n}{inplace}\PYG{o}{=}\PYG{n+nb+bp}{True}\PYG{p}{)}
+        \PYG{n}{df2}\PYG{o}{.}\PYG{n}{index} \PYG{o}{=} \PYG{p}{[}\PYG{l+s}{\PYGZsq{}bud\PYGZsq{}}\PYG{p}{,} \PYG{l+s}{\PYGZsq{}mom\PYGZsq{}}\PYG{p}{]}
+        \PYG{n}{df2}\PYG{p}{[}\PYG{l+s}{\PYGZsq{}center\PYGZsq{}}\PYG{p}{]} \PYG{o}{=} \PYG{n+nb}{zip}\PYG{p}{((}\PYG{n}{df2}\PYG{o}{.}\PYG{n}{X} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{25}\PYG{p}{)}\PYG{o}{*.}\PYG{l+m+mo}{055}\PYG{p}{,} \PYG{p}{(}\PYG{l+m+mi}{225} \PYG{o}{\PYGZhy{}} \PYG{n}{df2}\PYG{o}{.}\PYG{n}{Y}\PYG{p}{)}\PYG{o}{*.}\PYG{l+m+mo}{055}\PYG{p}{)}
+        \PYG{n}{figone} \PYG{o}{=} \PYG{n}{mlab}\PYG{o}{.}\PYG{n}{figure}\PYG{p}{(}\PYG{n}{figure}\PYG{o}{=}\PYG{n}{filekey}\PYG{p}{,}
+                             \PYG{n}{size}\PYG{o}{=}\PYG{p}{(}\PYG{l+m+mi}{800}\PYG{p}{,} \PYG{l+m+mi}{600}\PYG{p}{),}
+                             \PYG{n}{bgcolor}\PYG{o}{=}\PYG{p}{(}\PYG{l+m+mf}{0.}\PYG{p}{,} \PYG{l+m+mf}{0.}\PYG{p}{,} \PYG{l+m+mf}{0.}\PYG{p}{))}
+
+        \PYG{n}{figone}\PYG{o}{.}\PYG{n}{scene}\PYG{o}{.}\PYG{n}{disable\PYGZus{}render} \PYG{o}{=} \PYG{n+nb+bp}{True}
+        \PYG{n}{\PYGZus{}}\PYG{p}{,} \PYG{n}{vtkobj}\PYG{p}{,} \PYG{n}{tubeout} \PYG{o}{=} \PYG{n}{vz}\PYG{o}{.}\PYG{n}{cellplot}\PYG{p}{(}\PYG{n}{figone}\PYG{p}{,} \PYG{n}{filekeys}\PYG{p}{,} \PYG{n}{filekey}\PYG{p}{)}
+        \PYG{n}{xmin}\PYG{p}{,} \PYG{n}{xmax}\PYG{p}{,} \PYG{n}{ymin}\PYG{p}{,} \PYG{n}{ymax}\PYG{p}{,} \PYG{n}{zmin}\PYG{p}{,} \PYG{n}{zmax} \PYG{o}{=} \PYG{n}{vtkobj}\PYG{o}{.}\PYG{n}{outputs}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{o}{.}\PYG{n}{bounds}
+
+\PYG{c}{\PYGZsh{} zposition of center slice}
+        \PYG{k}{try}\PYG{p}{:}
+            \PYG{n}{zp} \PYG{o}{=} \PYG{n}{df1}\PYG{o}{.}\PYG{n}{ix}\PYG{p}{[}\PYG{l+s}{\PYGZsq{}centerpt\PYGZsq{}}\PYG{p}{][}\PYG{l+m+mi}{0}\PYG{p}{]}
+        \PYG{k}{except} \PYG{n+ne}{KeyError}\PYG{p}{:}
+            \PYG{n}{zp} \PYG{o}{=} \PYG{p}{(}\PYG{n}{zmax}\PYG{o}{\PYGZhy{}}\PYG{n}{zmin}\PYG{p}{)}\PYG{o}{/}\PYG{l+m+mi}{2}
+
+        \PYG{n}{vz}\PYG{o}{.}\PYG{n}{adjustlut}\PYG{p}{(}\PYG{n}{tubeout}\PYG{p}{)}
+        \PYG{n}{vz}\PYG{o}{.}\PYG{n}{drawelips}\PYG{p}{(}\PYG{l+s}{\PYGZsq{}mom\PYGZsq{}}\PYG{p}{,} \PYG{n}{df2}\PYG{p}{,} \PYG{n}{zpos}\PYG{o}{=}\PYG{n}{zp}\PYG{p}{)}
+        \PYG{n}{vz}\PYG{o}{.}\PYG{n}{drawelips}\PYG{p}{(}\PYG{l+s}{\PYGZsq{}bud\PYGZsq{}}\PYG{p}{,} \PYG{n}{df2}\PYG{p}{,} \PYG{n}{zpos}\PYG{o}{=}\PYG{n}{zp}\PYG{p}{)}
+
+\PYG{c}{\PYGZsh{}       get orientation vector defining mom bud axis}
+
+        \PYG{n}{tr}\PYG{p}{,} \PYG{n}{rot}\PYG{p}{,} \PYG{n}{scale1} \PYG{o}{=} \PYG{n}{vz}\PYG{o}{.}\PYG{n}{arrowvect}\PYG{p}{(}\PYG{n}{base}\PYG{p}{,} \PYG{n}{tip}\PYG{p}{,} \PYG{n}{neck}\PYG{p}{)}
+        \PYG{n}{arrsource} \PYG{o}{=} \PYG{n}{tvtk}\PYG{o}{.}\PYG{n}{ArrowSource}\PYG{p}{(}\PYG{n}{shaft\PYGZus{}radius}\PYG{o}{=.}\PYG{l+m+mo}{01}\PYG{p}{,}
+                                     \PYG{n}{shaft\PYGZus{}resolution}\PYG{o}{=}\PYG{l+m+mi}{18}\PYG{p}{,}
+                                     \PYG{n}{tip\PYGZus{}length}\PYG{o}{=.}\PYG{l+m+mi}{15}\PYG{p}{,}
+                                     \PYG{n}{tip\PYGZus{}radius}\PYG{o}{=.}\PYG{l+m+mo}{05}\PYG{p}{,}
+                                     \PYG{n}{tip\PYGZus{}resolution}\PYG{o}{=}\PYG{l+m+mi}{18}\PYG{p}{)}
+        \PYG{n}{transformPD} \PYG{o}{=} \PYG{n}{tvtk}\PYG{o}{.}\PYG{n}{TransformPolyDataFilter}\PYG{p}{()}
+        \PYG{n}{transformPD} \PYG{o}{=} \PYG{n}{tvtk}\PYG{o}{.}\PYG{n}{TransformPolyDataFilter}\PYG{p}{(}\PYG{n+nb}{input}\PYG{o}{=}\PYG{n}{arrsource}\PYG{o}{.}\PYG{n}{output}\PYG{p}{,}
+                                                   \PYG{n}{transform}\PYG{o}{=}\PYG{n}{tr}\PYG{p}{)}
+
+\PYG{c}{\PYGZsh{} All the transformations objects}
+        \PYG{c}{\PYGZsh{} ccw 90 rotation and TR to mother bud coord system (for 2nd arrow)}
+        \PYG{n}{ccw90} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{eye}\PYG{p}{(}\PYG{l+m+mi}{4}\PYG{p}{)}
+        \PYG{n}{ccw90}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{l+m+mi}{0}\PYG{p}{]} \PYG{o}{=} \PYG{l+m+mi}{0}
+        \PYG{n}{ccw90}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{l+m+mi}{1}\PYG{p}{]} \PYG{o}{=} \PYG{l+m+mi}{0}
+        \PYG{n}{ccw90}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{l+m+mi}{1}\PYG{p}{]} \PYG{o}{=} \PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}
+        \PYG{n}{ccw90}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{l+m+mi}{0}\PYG{p}{]} \PYG{o}{=} \PYG{l+m+mi}{1}
+        \PYG{n}{trans1} \PYG{o}{=} \PYG{n}{tvtk}\PYG{o}{.}\PYG{n}{Transform}\PYG{p}{()}
+        \PYG{n}{trans1}\PYG{o}{.}\PYG{n}{set\PYGZus{}matrix}\PYG{p}{(}\PYG{n}{ccw90}\PYG{o}{.}\PYG{n}{flatten}\PYG{p}{())}
+        \PYG{n}{trans1}\PYG{o}{.}\PYG{n}{scale}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{o}{/}\PYG{l+m+mf}{3.}\PYG{p}{,} \PYG{l+m+mi}{1}\PYG{o}{/}\PYG{l+m+mf}{3.}\PYG{p}{,} \PYG{l+m+mi}{1}\PYG{o}{/}\PYG{l+m+mf}{3.}\PYG{p}{)}
+        \PYG{n}{trans1}\PYG{o}{.}\PYG{n}{post\PYGZus{}multiply}\PYG{p}{()}
+        \PYG{n}{trans1}\PYG{o}{.}\PYG{n}{concatenate}\PYG{p}{(}\PYG{n}{tr}\PYG{p}{)}
+
+        \PYG{c}{\PYGZsh{} inverse transfrom from mother bud coords to cartesian coord}
+        \PYG{n}{trans2} \PYG{o}{=} \PYG{n}{tvtk}\PYG{o}{.}\PYG{n}{Transform}\PYG{p}{()}
+        \PYG{n}{rot}\PYG{o}{.}\PYG{n}{transpose}\PYG{p}{()}
+        \PYG{n}{trans2}\PYG{o}{.}\PYG{n}{translate}\PYG{p}{(}\PYG{o}{\PYGZhy{}}\PYG{n}{base}\PYG{p}{)}
+        \PYG{n}{trans2}\PYG{o}{.}\PYG{n}{post\PYGZus{}multiply}\PYG{p}{()}  \PYG{c}{\PYGZsh{} translate, THEN rotate}
+        \PYG{n}{trans2}\PYG{o}{.}\PYG{n}{concatenate}\PYG{p}{(}\PYG{n}{rot}\PYG{p}{)}
+        \PYG{n}{trans2}\PYG{o}{.}\PYG{n}{translate}\PYG{p}{([}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{l+m+mi}{0}\PYG{p}{,} \PYG{l+m+mi}{0}\PYG{p}{])}
+
+        \PYG{c}{\PYGZsh{} transform to scale and translate default arrowsource}
+        \PYG{n}{trans3} \PYG{o}{=} \PYG{n}{tvtk}\PYG{o}{.}\PYG{n}{Transform}\PYG{p}{()}
+        \PYG{n}{trans3}\PYG{o}{.}\PYG{n}{scale}\PYG{p}{(}\PYG{n}{scale1}\PYG{p}{,} \PYG{n}{scale1}\PYG{p}{,} \PYG{n}{scale1}\PYG{p}{)}
+        \PYG{n}{trans3}\PYG{o}{.}\PYG{n}{post\PYGZus{}multiply}\PYG{p}{()}
+        \PYG{n}{trans3}\PYG{o}{.}\PYG{n}{translate}\PYG{p}{([}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{l+m+mi}{0}\PYG{p}{,} \PYG{l+m+mi}{0}\PYG{p}{])}
+
+        \PYG{c}{\PYGZsh{} transform for second arrow (rotates 90ccw) at origin}
+        \PYG{n}{trans4} \PYG{o}{=} \PYG{n}{tvtk}\PYG{o}{.}\PYG{n}{Transform}\PYG{p}{()}
+        \PYG{n}{trans4}\PYG{o}{.}\PYG{n}{scale}\PYG{p}{(}\PYG{n}{scale1}\PYG{o}{/}\PYG{l+m+mi}{3}\PYG{p}{,} \PYG{n}{scale1}\PYG{o}{/}\PYG{l+m+mi}{3}\PYG{p}{,} \PYG{n}{scale1}\PYG{o}{/}\PYG{l+m+mi}{3}\PYG{p}{)}
+        \PYG{n}{trans4}\PYG{o}{.}\PYG{n}{post\PYGZus{}multiply}\PYG{p}{()}
+        \PYG{n}{trans4}\PYG{o}{.}\PYG{n}{concatenate}\PYG{p}{(}\PYG{n}{ccw90}\PYG{o}{.}\PYG{n}{flatten}\PYG{p}{())}
+        \PYG{n}{trans4}\PYG{o}{.}\PYG{n}{translate}\PYG{p}{([}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{l+m+mi}{0}\PYG{p}{,} \PYG{l+m+mi}{0}\PYG{p}{])}
+
+\PYG{c}{\PYGZsh{}       Draw all the transformed data}
+        \PYG{c}{\PYGZsh{} mother bud axis arrow in mother bud coord system}
+        \PYG{n}{arr\PYGZus{}mombud} \PYG{o}{=} \PYG{n}{mlab}\PYG{o}{.}\PYG{n}{pipeline}\PYG{o}{.}\PYG{n}{surface}\PYG{p}{(}\PYG{n}{transformPD}\PYG{o}{.}\PYG{n}{output}\PYG{p}{,}
+                                           \PYG{n}{figure}\PYG{o}{=}\PYG{n}{figone}\PYG{p}{,}
+                                           \PYG{n}{opacity}\PYG{o}{=.}\PYG{l+m+mi}{33}\PYG{p}{)}
+        \PYG{c}{\PYGZsh{} second arrow, perpendicular to arr\PYGZus{}mombud}
+        \PYG{n}{a2act} \PYG{o}{=} \PYG{n}{mlab}\PYG{o}{.}\PYG{n}{pipeline}\PYG{o}{.}\PYG{n}{surface}\PYG{p}{(}\PYG{n}{arrsource}\PYG{o}{.}\PYG{n}{output}\PYG{p}{,}
+                                      \PYG{n}{figure}\PYG{o}{=}\PYG{n}{figone}\PYG{p}{,}
+                                      \PYG{n}{opacity}\PYG{o}{=.}\PYG{l+m+mi}{33}\PYG{p}{)}
+        \PYG{n}{a2act}\PYG{o}{.}\PYG{n}{actor}\PYG{o}{.}\PYG{n}{actor}\PYG{o}{.}\PYG{n}{user\PYGZus{}transform} \PYG{o}{=} \PYG{n}{trans1}
+
+        \PYG{n}{tippt} \PYG{o}{=} \PYG{n}{tvtk}\PYG{o}{.}\PYG{n}{SphereSource}\PYG{p}{(}\PYG{n}{center}\PYG{o}{=}\PYG{n}{tip}\PYG{p}{,} \PYG{n}{radius}\PYG{o}{=.}\PYG{l+m+mi}{15}\PYG{p}{)}
+        \PYG{n}{mlab}\PYG{o}{.}\PYG{n}{pipeline}\PYG{o}{.}\PYG{n}{surface}\PYG{p}{(}\PYG{n}{tippt}\PYG{o}{.}\PYG{n}{output}\PYG{p}{,}
+                              \PYG{n}{figure}\PYG{o}{=}\PYG{n}{figone}\PYG{p}{,}
+                              \PYG{n}{color}\PYG{o}{=}\PYG{p}{(}\PYG{o}{.}\PYG{l+m+mi}{3}\PYG{p}{,} \PYG{l+m+mf}{1.}\PYG{p}{,} \PYG{o}{.}\PYG{l+m+mi}{3}\PYG{p}{),}
+                              \PYG{n}{opacity}\PYG{o}{=.}\PYG{l+m+mi}{33}\PYG{p}{)}
+        \PYG{n}{basept} \PYG{o}{=} \PYG{n}{tvtk}\PYG{o}{.}\PYG{n}{SphereSource}\PYG{p}{(}\PYG{n}{center}\PYG{o}{=}\PYG{n}{base}\PYG{p}{,} \PYG{n}{radius}\PYG{o}{=.}\PYG{l+m+mi}{15}\PYG{p}{)}
+        \PYG{n}{mlab}\PYG{o}{.}\PYG{n}{pipeline}\PYG{o}{.}\PYG{n}{surface}\PYG{p}{(}\PYG{n}{basept}\PYG{o}{.}\PYG{n}{output}\PYG{p}{,}
+                              \PYG{n}{figure}\PYG{o}{=}\PYG{n}{figone}\PYG{p}{,}
+                              \PYG{n}{color}\PYG{o}{=}\PYG{p}{(}\PYG{o}{.}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{o}{.}\PYG{l+m+mi}{3}\PYG{p}{,} \PYG{l+m+mi}{1}\PYG{p}{),}
+                              \PYG{n}{opacity}\PYG{o}{=.}\PYG{l+m+mi}{33}\PYG{p}{)}
+        \PYG{n}{neckpt} \PYG{o}{=} \PYG{n}{tvtk}\PYG{o}{.}\PYG{n}{SphereSource}\PYG{p}{(}\PYG{n}{center}\PYG{o}{=}\PYG{n}{neck}\PYG{p}{,} \PYG{n}{radius}\PYG{o}{=.}\PYG{l+m+mi}{15}\PYG{p}{)}
+        \PYG{n}{mlab}\PYG{o}{.}\PYG{n}{pipeline}\PYG{o}{.}\PYG{n}{surface}\PYG{p}{(}\PYG{n}{neckpt}\PYG{o}{.}\PYG{n}{output}\PYG{p}{,}
+                              \PYG{n}{figure}\PYG{o}{=}\PYG{n}{figone}\PYG{p}{,}
+                              \PYG{n}{color}\PYG{o}{=}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{o}{.}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{o}{.}\PYG{l+m+mi}{1}\PYG{p}{),}
+                              \PYG{n}{opacity}\PYG{o}{=.}\PYG{l+m+mi}{33}\PYG{p}{)}
+
+        \PYG{n}{cell\PYGZus{}t} \PYG{o}{=} \PYG{n}{tvtk}\PYG{o}{.}\PYG{n}{TransformPolyDataFilter}\PYG{p}{(}\PYG{n+nb}{input}\PYG{o}{=}\PYG{n}{vtkobj}\PYG{o}{.}\PYG{n}{outputs}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{],}
+                                              \PYG{n}{transform}\PYG{o}{=}\PYG{n}{trans2}\PYG{p}{)}\PYG{o}{.}\PYG{n}{output}
+        \PYG{n}{mom\PYGZus{}t}\PYG{p}{,} \PYG{n}{\PYGZus{}} \PYG{o}{=} \PYG{n}{vz}\PYG{o}{.}\PYG{n}{drawelips}\PYG{p}{(}\PYG{l+s}{\PYGZsq{}mom\PYGZsq{}}\PYG{p}{,} \PYG{n}{df2}\PYG{p}{,} \PYG{n}{zpos}\PYG{o}{=}\PYG{n}{zp}\PYG{p}{)}
+        \PYG{n}{bud\PYGZus{}t}\PYG{p}{,} \PYG{n}{\PYGZus{}} \PYG{o}{=} \PYG{n}{vz}\PYG{o}{.}\PYG{n}{drawelips}\PYG{p}{(}\PYG{l+s}{\PYGZsq{}bud\PYGZsq{}}\PYG{p}{,} \PYG{n}{df2}\PYG{p}{,} \PYG{n}{zpos}\PYG{o}{=}\PYG{n}{zp}\PYG{p}{)}
+        \PYG{n}{mom\PYGZus{}t}\PYG{o}{.}\PYG{n}{actor}\PYG{o}{.}\PYG{n}{actor}\PYG{o}{.}\PYG{n}{user\PYGZus{}transform} \PYG{o}{=} \PYG{n}{trans2}
+        \PYG{n}{bud\PYGZus{}t}\PYG{o}{.}\PYG{n}{actor}\PYG{o}{.}\PYG{n}{actor}\PYG{o}{.}\PYG{n}{user\PYGZus{}transform} \PYG{o}{=} \PYG{n}{trans2}
+
+        \PYG{c}{\PYGZsh{} transform the arrows and spheres in mombud axis coords back to origin}
+        \PYG{n}{arr\PYGZus{}mombud\PYGZus{}t} \PYG{o}{=} \PYG{n}{mlab}\PYG{o}{.}\PYG{n}{pipeline}\PYG{o}{.}\PYG{n}{surface}\PYG{p}{(}\PYG{n}{arrsource}\PYG{o}{.}\PYG{n}{output}\PYG{p}{,}
+                                             \PYG{n}{figure}\PYG{o}{=}\PYG{n}{figone}\PYG{p}{,}
+                                             \PYG{n}{opacity}\PYG{o}{=}\PYG{l+m+mf}{0.33}\PYG{p}{)}
+        \PYG{n}{arr\PYGZus{}mombud\PYGZus{}t}\PYG{o}{.}\PYG{n}{actor}\PYG{o}{.}\PYG{n}{actor}\PYG{o}{.}\PYG{n}{user\PYGZus{}transform} \PYG{o}{=} \PYG{n}{trans3}
+        \PYG{n}{a2act\PYGZus{}t} \PYG{o}{=} \PYG{n}{mlab}\PYG{o}{.}\PYG{n}{pipeline}\PYG{o}{.}\PYG{n}{surface}\PYG{p}{(}\PYG{n}{arrsource}\PYG{o}{.}\PYG{n}{output}\PYG{p}{,}
+                                        \PYG{n}{figure}\PYG{o}{=}\PYG{n}{figone}\PYG{p}{,}
+                                        \PYG{n}{opacity}\PYG{o}{=}\PYG{l+m+mf}{0.33}\PYG{p}{)}
+        \PYG{n}{a2act\PYGZus{}t}\PYG{o}{.}\PYG{n}{actor}\PYG{o}{.}\PYG{n}{actor}\PYG{o}{.}\PYG{n}{user\PYGZus{}transform} \PYG{o}{=} \PYG{n}{trans4}
+        \PYG{n}{base\PYGZus{}t} \PYG{o}{=} \PYG{n}{mlab}\PYG{o}{.}\PYG{n}{pipeline}\PYG{o}{.}\PYG{n}{surface}\PYG{p}{(}\PYG{n}{basept}\PYG{o}{.}\PYG{n}{output}\PYG{p}{,}
+                                       \PYG{n}{figure}\PYG{o}{=}\PYG{n}{figone}\PYG{p}{,}
+                                       \PYG{n}{color}\PYG{o}{=}\PYG{p}{(}\PYG{o}{.}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{o}{.}\PYG{l+m+mi}{3}\PYG{p}{,} \PYG{l+m+mi}{1}\PYG{p}{),}
+                                       \PYG{n}{opacity}\PYG{o}{=}\PYG{l+m+mf}{0.33}\PYG{p}{)}
+        \PYG{n}{tip\PYGZus{}t} \PYG{o}{=} \PYG{n}{mlab}\PYG{o}{.}\PYG{n}{pipeline}\PYG{o}{.}\PYG{n}{surface}\PYG{p}{(}\PYG{n}{tippt}\PYG{o}{.}\PYG{n}{output}\PYG{p}{,}
+                                      \PYG{n}{figure}\PYG{o}{=}\PYG{n}{figone}\PYG{p}{,}
+                                      \PYG{n}{opacity}\PYG{o}{=}\PYG{l+m+mf}{0.33}\PYG{p}{,}
+                                      \PYG{n}{color}\PYG{o}{=}\PYG{p}{(}\PYG{o}{.}\PYG{l+m+mi}{3}\PYG{p}{,} \PYG{l+m+mf}{1.}\PYG{p}{,} \PYG{o}{.}\PYG{l+m+mi}{3}\PYG{p}{))}
+        \PYG{n}{neck\PYGZus{}t} \PYG{o}{=} \PYG{n}{mlab}\PYG{o}{.}\PYG{n}{pipeline}\PYG{o}{.}\PYG{n}{surface}\PYG{p}{(}\PYG{n}{neckpt}\PYG{o}{.}\PYG{n}{output}\PYG{p}{,}
+                                       \PYG{n}{figure}\PYG{o}{=}\PYG{n}{figone}\PYG{p}{,}
+                                       \PYG{n}{color}\PYG{o}{=}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{o}{.}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{o}{.}\PYG{l+m+mi}{1}\PYG{p}{),}
+                                       \PYG{n}{opacity}\PYG{o}{=.}\PYG{l+m+mi}{33}\PYG{p}{)}
+        \PYG{n}{neck\PYGZus{}t}\PYG{o}{.}\PYG{n}{actor}\PYG{o}{.}\PYG{n}{actor}\PYG{o}{.}\PYG{n}{user\PYGZus{}transform} \PYG{o}{=} \PYG{n}{trans2}
+        \PYG{n}{base\PYGZus{}t}\PYG{o}{.}\PYG{n}{actor}\PYG{o}{.}\PYG{n}{actor}\PYG{o}{.}\PYG{n}{user\PYGZus{}transform} \PYG{o}{=} \PYG{n}{trans2}
+        \PYG{n}{tip\PYGZus{}t}\PYG{o}{.}\PYG{n}{actor}\PYG{o}{.}\PYG{n}{actor}\PYG{o}{.}\PYG{n}{user\PYGZus{}transform} \PYG{o}{=} \PYG{n}{trans2}
+        \PYG{n}{dftemp}\PYG{o}{=}\PYG{n}{pd}\PYG{o}{.}\PYG{n}{Series}\PYG{p}{(\PYGZob{}}\PYG{l+s}{\PYGZsq{}base\PYGZsq{}}\PYG{p}{:}\PYG{n}{base\PYGZus{}t}\PYG{o}{.}\PYG{n}{actor}\PYG{o}{.}\PYG{n}{actor}\PYG{o}{.}\PYG{n}{center}\PYG{p}{,}
+                          \PYG{l+s}{\PYGZsq{}neck\PYGZsq{}}\PYG{p}{:}\PYG{n}{neck\PYGZus{}t}\PYG{o}{.}\PYG{n}{actor}\PYG{o}{.}\PYG{n}{actor}\PYG{o}{.}\PYG{n}{center}\PYG{p}{,}
+                          \PYG{l+s}{\PYGZsq{}tip\PYGZsq{}}\PYG{p}{:}\PYG{n}{tip\PYGZus{}t}\PYG{o}{.}\PYG{n}{actor}\PYG{o}{.}\PYG{n}{actor}\PYG{o}{.}\PYG{n}{center}\PYG{p}{,}
+                          \PYG{l+s}{\PYGZsq{}media\PYGZsq{}}\PYG{p}{:}\PYG{n}{key}\PYG{p}{[:}\PYG{l+m+mi}{3}\PYG{p}{],}
+                          \PYG{l+s}{\PYGZsq{}bud\PYGZsq{}}\PYG{p}{:} \PYG{n}{df2}\PYG{o}{.}\PYG{n}{ix}\PYG{p}{[}\PYG{l+s}{\PYGZsq{}bud\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}vol\PYGZsq{}}\PYG{p}{],}
+                          \PYG{l+s}{\PYGZsq{}mom\PYGZsq{}}\PYG{p}{:} \PYG{n}{df2}\PYG{o}{.}\PYG{n}{ix}\PYG{p}{[}\PYG{l+s}{\PYGZsq{}mom\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}vol\PYGZsq{}}\PYG{p}{]\PYGZcb{},}
+                          \PYG{n}{name}\PYG{o}{=}\PYG{n}{key}\PYG{p}{)}
+\PYG{c}{\PYGZsh{}        mlab.close(all=True)}
+        \PYG{n}{dfmb} \PYG{o}{=} \PYG{n}{dfmb}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{n}{dftemp}\PYG{p}{)}
+
+        \PYG{c}{\PYGZsh{} THIS IS THE TRANSFORMED CELL VTK POLYDATA THAT WE WANT!!}
+        \PYG{n}{cell\PYGZus{}t2} \PYG{o}{=} \PYG{n}{mlab}\PYG{o}{.}\PYG{n}{pipeline}\PYG{o}{.}\PYG{n}{surface}\PYG{p}{(}\PYG{n}{cell\PYGZus{}t}\PYG{p}{,} \PYG{n}{figure}\PYG{o}{=}\PYG{n}{figone}\PYG{p}{)}
+        \PYG{n}{cell\PYGZus{}t2}\PYG{o}{.}\PYG{n}{actor}\PYG{o}{.}\PYG{n}{mapper}\PYG{o}{.}\PYG{n}{scalar\PYGZus{}visibility} \PYG{o}{=} \PYG{n+nb+bp}{True}
+        \PYG{n}{cell\PYGZus{}t2}\PYG{o}{.}\PYG{n}{module\PYGZus{}manager}\PYG{o}{.}\PYG{n}{lut\PYGZus{}data\PYGZus{}mode} \PYG{o}{=} \PYG{l+s}{\PYGZsq{}point data\PYGZsq{}}
+        \PYG{n}{vz}\PYG{o}{.}\PYG{n}{adjustlut}\PYG{p}{(}\PYG{n}{cell\PYGZus{}t2}\PYG{p}{)}
+        \PYG{n}{figone}\PYG{o}{.}\PYG{n}{scene}\PYG{o}{.}\PYG{n}{disable\PYGZus{}render} \PYG{o}{=} \PYG{n+nb+bp}{False}
+        \PYG{n}{mlab}\PYG{o}{.}\PYG{n}{view}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{l+m+mi}{0}\PYG{p}{,} \PYG{l+m+mi}{180}\PYG{p}{)}
+        \PYG{n}{mlab}\PYG{o}{.}\PYG{n}{view}\PYG{p}{(}\PYG{n}{distance}\PYG{o}{=}\PYG{l+s}{\PYGZsq{}auto\PYGZsq{}}\PYG{p}{)}
+\PYG{c}{\PYGZsh{}        w = tvtk.PolyDataWriter(input=cell\PYGZus{}t, file\PYGZus{}name=\PYGZsq{}\PYGZpc{}s.vtk\PYGZsq{} \PYGZpc{} key)}
+\PYG{c}{\PYGZsh{}        w.write()}
+    \PYG{k}{with} \PYG{n+nb}{open}\PYG{p}{(}\PYG{l+s}{\PYGZsq{}mombudtrans.pkl\PYGZsq{}}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}wb\PYGZsq{}}\PYG{p}{)} \PYG{k}{as} \PYG{n}{output}\PYG{p}{:}
+        \PYG{n}{pickle}\PYG{o}{.}\PYG{n}{dump}\PYG{p}{(}\PYG{n}{dfmb}\PYG{p}{,} \PYG{n}{output}\PYG{p}{)}
+\end{Verbatim}
